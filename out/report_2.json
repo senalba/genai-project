@@ -1,0 +1,191 @@
+{
+  "generated_at": "2025-08-31T02:29:47.355654Z",
+  "top_positive": [
+    {
+      "title": "Tories would maximise North Sea oil and gas extraction, Badenoch to say",
+      "summary_llm": "Tory leader Kemi Badenoch to announce plan to focus solely on \"maximising extraction\" Badench to formally announce the plan in a speech in Aberdeen on Tuesday . Reform UK has said it wants more fossil fuels extracted from the North Sea . Labour government has committed to banning new exploration licences .",
+      "sentiment": "positive",
+      "mention_count": 2,
+      "mention_count_domains": 2,
+      "domains": [
+        "bbc.com",
+        "theguardian.com"
+      ],
+      "canonical_url": "https://www.bbc.com/news/articles/cp890n51684o?at_medium=RSS&at_campaign=rss",
+      "sources": [
+        "https://www.bbc.com/news/articles/cp890n51684o?at_medium=RSS&at_campaign=rss",
+        "https://www.theguardian.com/politics/2025/aug/30/tories-would-maximise-north-sea-oil-and-gas-extraction-badenoch-expected-to-say"
+      ],
+      "first_seen": "2025-08-31T02:28:04.848823+00:00",
+      "last_seen": "2025-08-31T02:28:05.558578+00:00"
+    },
+    {
+      "title": "Finland's Prime Minister Sanna Marin concedes election",
+      "summary_llm": "Finland's Prime Minister Sanna Marin concedes defeat in parliamentary election . Opposition right-wing National Coalition Party claims victory in tightly fought contest . Pro-business NCP expected to win 48 of the 200 seats in parliament, narrowly ahead of the nationalist Finns Party . Marin, 37, the world’s youngest prime minister when she took office in 2019 .",
+      "sentiment": "positive",
+      "mention_count": 2,
+      "mention_count_domains": 1,
+      "domains": [
+        "cnn.com"
+      ],
+      "canonical_url": "https://www.cnn.com/videos/world/2023/04/03/finland-prime-minister-sanna-marin-concedes-election-right-wing-party-wins-ovn-intl-ldn-vpx.cnn",
+      "sources": [
+        "https://www.cnn.com/videos/world/2023/04/03/finland-prime-minister-sanna-marin-concedes-election-right-wing-party-wins-ovn-intl-ldn-vpx.cnn",
+        "https://www.cnn.com/2023/04/02/europe/sanna-marin-finland-elections-concedes-intl/index.html"
+      ],
+      "first_seen": "2025-08-31T02:28:05.710920+00:00",
+      "last_seen": "2025-08-31T02:28:05.711032+00:00"
+    },
+    {
+      "title": "See the world's deepest fish",
+      "summary_llm": "A young snailfish has become the deepest fish ever filmed by scientists during a probe into the abyss of the northern Pacific Ocean . Scientists from University of Western Australia and Tokyo University of Marine Science and Technology released footage of the snailfish on Sunday . Snailfish are members of Liparidae family, and while most snailfish live in shallow water, others survive at some of the greatest depths ever",
+      "sentiment": "positive",
+      "mention_count": 2,
+      "mention_count_domains": 1,
+      "domains": [
+        "cnn.com"
+      ],
+      "canonical_url": "https://www.cnn.com/2023/04/03/asia/deepest-fish-filmed-off-japan-scn-intl-hnk/index.html",
+      "sources": [
+        "https://www.cnn.com/2023/04/03/asia/deepest-fish-filmed-off-japan-scn-intl-hnk/index.html",
+        "https://www.cnn.com/videos/travel/2023/04/03/snailfish-deepest-fish-on-camera-lon-orig-ao-cprog-scn.cnn"
+      ],
+      "first_seen": "2025-08-31T02:28:05.711875+00:00",
+      "last_seen": "2025-08-31T02:28:05.712420+00:00"
+    },
+    {
+      "title": "First week 'critical' to avoid children missing school later, parents told",
+      "summary_llm": "Education Secretary Bridget Phillipson said schools and parents should \"double down\" to get children in at the start of the 2025 term . More than half (57%) of pupils who were partially absent in week one became \"persistently absent\" Overall, 18% of pupils were persistently absent in the 2024-25 school year, down from 23% in 2021-22 .",
+      "sentiment": "positive",
+      "mention_count": 1,
+      "mention_count_domains": 1,
+      "domains": [
+        "bbc.com"
+      ],
+      "canonical_url": "https://www.bbc.com/news/articles/cg7jk3rr225o?at_medium=RSS&at_campaign=rss",
+      "sources": [
+        "https://www.bbc.com/news/articles/cg7jk3rr225o?at_medium=RSS&at_campaign=rss"
+      ],
+      "first_seen": "2025-08-31T02:28:04.848487+00:00",
+      "last_seen": "2025-08-31T02:28:04.848487+00:00"
+    },
+    {
+      "title": "The trade in US body parts that's completely legal - but ripe for exploitation",
+      "summary_llm": "For-profit body trade is effectively outlawed in the UK and other European countries . But looser regulation in the US has allowed the trade to flourish in the U.S. The largest investigation of its kind - conducted by Reuters journalist Brian Grow - has identified 25 for 25 forking companies in the trade .",
+      "sentiment": "positive",
+      "mention_count": 1,
+      "mention_count_domains": 1,
+      "domains": [
+        "bbc.com"
+      ],
+      "canonical_url": "https://www.bbc.com/news/articles/ce83r56xwj7o?at_medium=RSS&at_campaign=rss",
+      "sources": [
+        "https://www.bbc.com/news/articles/ce83r56xwj7o?at_medium=RSS&at_campaign=rss"
+      ],
+      "first_seen": "2025-08-31T02:28:04.848634+00:00",
+      "last_seen": "2025-08-31T02:28:04.848634+00:00"
+    }
+  ],
+  "top_negative": [
+    {
+      "title": "Nvidia Is Leading a Mag 7 Selloff, But Breadth Is Mixed",
+      "summary_llm": "The Nasdaq Composite was down 1%, while the S&P 500 was off 0.6% . The Dow was down 160 points, or 0.4% . Tech, industrials, consumer discretionary, and communication services were getting hit hard",
+      "sentiment": "negative",
+      "mention_count": 2,
+      "mention_count_domains": 1,
+      "domains": [
+        "finance.yahoo.com"
+      ],
+      "canonical_url": "https://finance.yahoo.com/m/cff801cd-7806-39ad-9fed-a8ec1b8ef1ff/the-stock-market%E2%80%99s.html?.tsrc=rss",
+      "sources": [
+        "https://finance.yahoo.com/m/cff801cd-7806-39ad-9fed-a8ec1b8ef1ff/the-stock-market%E2%80%99s.html?.tsrc=rss",
+        "https://finance.yahoo.com/m/f04bea1c-8725-3db7-8aee-a508d2dc9875/nvidia-is-leading-a-mag-7.html?.tsrc=rss"
+      ],
+      "first_seen": "2025-08-31T02:28:06.015272+00:00",
+      "last_seen": "2025-08-31T02:28:06.015533+00:00"
+    },
+    {
+      "title": "'Better than I thought' - Moyes lauds maverick Grealish after win at Wolves",
+      "summary_llm": "Jack Grealish has gone from forgotten man to main man in double-quick time since joining Everton on loan . He has been left out of England squad for World Cup qualifiers against Andorra and Serbia . The former Manchester City man is the first Everton player to assist two or more goals in consecutive Premier League appearances for the Toffees . David Moyes: \"He is even better",
+      "sentiment": "negative",
+      "mention_count": 1,
+      "mention_count_domains": 1,
+      "domains": [
+        "bbc.com"
+      ],
+      "canonical_url": "https://www.bbc.com/sport/football/articles/cn85wepeq7po?at_medium=RSS&at_campaign=rss",
+      "sources": [
+        "https://www.bbc.com/sport/football/articles/cn85wepeq7po?at_medium=RSS&at_campaign=rss"
+      ],
+      "first_seen": "2025-08-31T02:28:04.850632+00:00",
+      "last_seen": "2025-08-31T02:28:04.850632+00:00"
+    },
+    {
+      "title": "Former UN climate chief urges Australia to set ‘prosperity’ target of cutting emissions by 75% by 2035",
+      "summary_llm": "Former UN climate chief urges Australia to set ‘prosperity’ target of cutting emissions by 75% by 2035 . Christiana Figueres backs calls from a group of more than 350 businesses that it would be better for the economy than a lower goal . Cabinet is yet to receive formal advice from the Climate Change Authority, chaired by the former NSW Liberal treasurer Matt Kean",
+      "sentiment": "negative",
+      "mention_count": 1,
+      "mention_count_domains": 1,
+      "domains": [
+        "theguardian.com"
+      ],
+      "canonical_url": "https://www.theguardian.com/environment/2025/aug/31/former-un-climate-chief-urges-australia-to-set-prosperity-target-of-cutting-emissions-by-75-by-2035",
+      "sources": [
+        "https://www.theguardian.com/environment/2025/aug/31/former-un-climate-chief-urges-australia-to-set-prosperity-target-of-cutting-emissions-by-75-by-2035"
+      ],
+      "first_seen": "2025-08-31T02:28:05.557669+00:00",
+      "last_seen": "2025-08-31T02:28:05.557669+00:00"
+    },
+    {
+      "title": "US senators demand ‘massive surge’ of baby formula and aid to be sent to Gaza",
+      "summary_llm": "Group of five senators in letter to Marco Rubio call on US to use its ‘full power’ to help people facing starvation . More than 300 people, including at least 119 children, have died from hunger in Gaza since October 2023 . Israel announced on Friday it will no longer pause fighting to allow aid deliveries in Gaza City .",
+      "sentiment": "negative",
+      "mention_count": 1,
+      "mention_count_domains": 1,
+      "domains": [
+        "theguardian.com"
+      ],
+      "canonical_url": "https://www.theguardian.com/world/2025/aug/30/senators-demand-baby-formula-aid-gaza",
+      "sources": [
+        "https://www.theguardian.com/world/2025/aug/30/senators-demand-baby-formula-aid-gaza"
+      ],
+      "first_seen": "2025-08-31T02:28:05.558140+00:00",
+      "last_seen": "2025-08-31T02:28:05.558140+00:00"
+    },
+    {
+      "title": "New drug hailed as ‘gamechanger’ in tackling stubbornly high blood pressure",
+      "summary_llm": "New drug hailed as ‘gamechanger’ in tackling stubbornly high blood pressure . Trials of baxdrostat have produced ‘exciting’ results for people whose hypertension has proved difficult to control . The breakthrough has taken decades of research to achieve .",
+      "sentiment": "negative",
+      "mention_count": 1,
+      "mention_count_domains": 1,
+      "domains": [
+        "theguardian.com"
+      ],
+      "canonical_url": "https://www.theguardian.com/society/2025/aug/30/drug-baxdrostat-gamechanger-high-blood-pressure-hypertension",
+      "sources": [
+        "https://www.theguardian.com/society/2025/aug/30/drug-baxdrostat-gamechanger-high-blood-pressure-hypertension"
+      ],
+      "first_seen": "2025-08-31T02:28:05.558791+00:00",
+      "last_seen": "2025-08-31T02:28:05.558791+00:00"
+    }
+  ],
+  "stats": {
+    "items_ingested": 203,
+    "groups": 191,
+    "feeds": [
+      "http://feeds.bbci.co.uk/news/rss.xml",
+      "https://feeds.reuters.com/reuters/topNews",
+      "https://apnews.com/hub/ap-top-news?utm_source=apnews.com&utm_medium=referral&utm_campaign=ap_rss",
+      "https://www.theguardian.com/world/rss",
+      "http://rss.cnn.com/rss/edition.rss",
+      "https://www.cnbc.com/id/100003114/device/rss/rss.html",
+      "https://feeds.finance.yahoo.com/rss/2.0/headline?s=^GSPC&region=US&lang=en-US",
+      "https://www.theverge.com/rss/index.xml",
+      "https://www.investing.com/rss/news.rss"
+    ],
+    "similarity_threshold": 0.72,
+    "summarizer": "hf",
+    "hf_model": "sshleifer/distilbart-cnn-12-6",
+    "max_age_hours": 48
+  }
+}

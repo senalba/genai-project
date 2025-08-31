@@ -1,0 +1,5 @@
+A generative pre-trained transformer (GPT) is a large language model (LLM) used in generative AI chatbots, based on the transformer architecture developed by Google in 2017. OpenAI introduced the first GPT model, GPT-1, in 2018, followed by larger models like GPT-2 and GPT-3, which demonstrated advanced capabilities such as few-shot learning. The popular ChatGPT, launched in late 2022, utilized GPT-3.5 and spurred the development of competing models from other organizations.
+
+GPTs can generate various types of data, including text, images, and audio, with models like GPT-4o showcasing multimodal capabilities. OpenAI's approach includes reinforcement learning from human feedback (RLHF) to align model behavior with user preferences, leading to the creation of instruction-tuned models like InstructGPT.
+
+OpenAI claims "GPT" as its brand, restricting its use by other companies. The company has sought trademark registration for "GPT," but challenges remain due to its generic nature. Despite this, OpenAI continues to pursue trademark rights while allowing some use of "GPT" in custom versions of ChatGPT by subscribers.

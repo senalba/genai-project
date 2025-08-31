@@ -1,0 +1,29 @@
+name: news-impact
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pandas
+  - numpy
+  - scikit-learn
+  - tqdm
+  - requests
+  - feedparser
+  - beautifulsoup4
+  - lxml
+  - pytorch
+  - transformers
+  - sentence-transformers
+  - datasets>=2.20
+  - pyarrow>=17
+  - python-dotenv
+  - llvm-openmp
+  - streamlit
+  - streamlit-chat
+  - pip
+  - pip:
+      - newspaper3k
+      - openai
+      - langchain
+      - chromadb
+      - tiktoken

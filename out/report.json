@@ -1,0 +1,182 @@
+{
+  "generated_at": "2025-08-31T02:51:33.701942Z",
+  "top_positive": [
+    {
+      "title": "First week 'critical' to avoid children missing school later, parents told",
+      "summary_llm": "Education Secretary Bridget Phillipson said schools and parents should \"double down\" to get children in at the start of the 2025 term . More than half (57%) of pupils who were partially absent in week one became \"persistently absent\" Overall, 18% of pupils were persistently absent in the 2024-25 school year, down from 23% in 2021-22 .",
+      "sentiment": "positive",
+      "mention_count": 1,
+      "mention_count_domains": 1,
+      "domains": [
+        "bbc.com"
+      ],
+      "canonical_url": "https://www.bbc.com/news/articles/cg7jk3rr225o?at_medium=RSS&at_campaign=rss",
+      "sources": [
+        "https://www.bbc.com/news/articles/cg7jk3rr225o?at_medium=RSS&at_campaign=rss"
+      ],
+      "first_seen": "2025-08-31T02:49:58.981903+00:00",
+      "last_seen": "2025-08-31T02:49:58.981903+00:00"
+    },
+    {
+      "title": "The trade in US body parts that's completely legal - but ripe for exploitation",
+      "summary_llm": "For-profit body trade is effectively outlawed in the UK and other European countries . But looser regulation in the US has allowed the trade to flourish in the U.S. The largest investigation of its kind - conducted by Reuters journalist Brian Grow - has identified 25 for 25 forking companies in the trade .",
+      "sentiment": "positive",
+      "mention_count": 1,
+      "mention_count_domains": 1,
+      "domains": [
+        "bbc.com"
+      ],
+      "canonical_url": "https://www.bbc.com/news/articles/ce83r56xwj7o?at_medium=RSS&at_campaign=rss",
+      "sources": [
+        "https://www.bbc.com/news/articles/ce83r56xwj7o?at_medium=RSS&at_campaign=rss"
+      ],
+      "first_seen": "2025-08-31T02:49:58.982046+00:00",
+      "last_seen": "2025-08-31T02:49:58.982046+00:00"
+    },
+    {
+      "title": "Tories pledge to get all oil and gas out of North Sea",
+      "summary_llm": "Tories pledge to get all oil and gas out of North Sea if elected . Kemi Badenoch to formally announce plan to focus solely on \"maximising extraction\" Reform UK has said it wants more fossil fuels extracted from the North Sea . Labour government has committed to banning new exploration licences .",
+      "sentiment": "positive",
+      "mention_count": 1,
+      "mention_count_domains": 1,
+      "domains": [
+        "bbc.com"
+      ],
+      "canonical_url": "https://www.bbc.com/news/articles/cp890n51684o?at_medium=RSS&at_campaign=rss",
+      "sources": [
+        "https://www.bbc.com/news/articles/cp890n51684o?at_medium=RSS&at_campaign=rss"
+      ],
+      "first_seen": "2025-08-31T02:49:58.982143+00:00",
+      "last_seen": "2025-08-31T02:49:58.982143+00:00"
+    },
+    {
+      "title": "Watch: The best looks from the Venice red carpet so far",
+      "summary_llm": "Thousands of pro-Palestine protesters gathered in the Italian city to demonstrate against the war in Gaza . Helicopter was attempting to collect water to fight wildfires at the time of the crash . At least three people have also died in Spain, Albania and Turkey as wildfires wreak havoc .",
+      "sentiment": "positive",
+      "mention_count": 1,
+      "mention_count_domains": 1,
+      "domains": [
+        "bbc.com"
+      ],
+      "canonical_url": "https://www.bbc.com/news/videos/c9d0zz3145lo?at_medium=RSS&at_campaign=rss",
+      "sources": [
+        "https://www.bbc.com/news/videos/c9d0zz3145lo?at_medium=RSS&at_campaign=rss"
+      ],
+      "first_seen": "2025-08-31T02:49:58.982404+00:00",
+      "last_seen": "2025-08-31T02:49:58.982404+00:00"
+    },
+    {
+      "title": "‘Public enemy number one’: The battle against an eight-toothed beetle threatening UK forests",
+      "summary_llm": "The bark beetle has been the scourge of Europe, killing millions of spruce trees . UK government scientists have been fighting back with sniffer dogs, drones and nuclear waste models . They claim the UK has eradicated the beetle from at risk areas in the east and south east . But climate change could make the job even harder in the future .",
+      "sentiment": "positive",
+      "mention_count": 1,
+      "mention_count_domains": 1,
+      "domains": [
+        "bbc.com"
+      ],
+      "canonical_url": "https://www.bbc.com/news/articles/clyr8yml9rro?at_medium=RSS&at_campaign=rss",
+      "sources": [
+        "https://www.bbc.com/news/articles/clyr8yml9rro?at_medium=RSS&at_campaign=rss"
+      ],
+      "first_seen": "2025-08-31T02:49:58.982479+00:00",
+      "last_seen": "2025-08-31T02:49:58.982479+00:00"
+    }
+  ],
+  "top_negative": [
+    {
+      "title": "Nvidia Is Leading a Mag 7 Selloff, But Breadth Is Mixed",
+      "summary_llm": "The Nasdaq Composite was down 1%, while the S&P 500 was off 0.6% . The Dow was down 160 points, or 0.4% . Tech, industrials, consumer discretionary, and communication services were getting hit hard",
+      "sentiment": "negative",
+      "mention_count": 2,
+      "mention_count_domains": 1,
+      "domains": [
+        "finance.yahoo.com"
+      ],
+      "canonical_url": "https://finance.yahoo.com/m/cff801cd-7806-39ad-9fed-a8ec1b8ef1ff/the-stock-market%E2%80%99s.html?.tsrc=rss",
+      "sources": [
+        "https://finance.yahoo.com/m/cff801cd-7806-39ad-9fed-a8ec1b8ef1ff/the-stock-market%E2%80%99s.html?.tsrc=rss",
+        "https://finance.yahoo.com/m/f04bea1c-8725-3db7-8aee-a508d2dc9875/nvidia-is-leading-a-mag-7.html?.tsrc=rss"
+      ],
+      "first_seen": "2025-08-31T02:49:59.331043+00:00",
+      "last_seen": "2025-08-31T02:49:59.331509+00:00"
+    },
+    {
+      "title": "'Better than I thought' - Moyes lauds maverick Grealish after win at Wolves",
+      "summary_llm": "Jack Grealish has gone from forgotten man to main man in double-quick time since joining Everton on loan . He has been left out of England squad for World Cup qualifiers against Andorra and Serbia . The former Manchester City man is the first Everton player to assist two or more goals in consecutive Premier League appearances for the Toffees . David Moyes: \"He is even better",
+      "sentiment": "negative",
+      "mention_count": 1,
+      "mention_count_domains": 1,
+      "domains": [
+        "bbc.com"
+      ],
+      "canonical_url": "https://www.bbc.com/sport/football/articles/cn85wepeq7po?at_medium=RSS&at_campaign=rss",
+      "sources": [
+        "https://www.bbc.com/sport/football/articles/cn85wepeq7po?at_medium=RSS&at_campaign=rss"
+      ],
+      "first_seen": "2025-08-31T02:49:58.984069+00:00",
+      "last_seen": "2025-08-31T02:49:58.984069+00:00"
+    },
+    {
+      "title": "Elliott sees opportunities to create value at warehouse REIT Rexford Industrial",
+      "summary_llm": "Elliott sees opportunities to create value at warehouse REIT Rexford Industrial . The industrial REIT space has benefited from strong secular tailwinds, as the rise of e-commerce has driven up warehousing needs over time . Despite being a California-based company, they are domiciled in Maryland, which allows the company to classify its board without shareholder approval .",
+      "sentiment": "negative",
+      "mention_count": 1,
+      "mention_count_domains": 1,
+      "domains": [
+        "cnbc.com"
+      ],
+      "canonical_url": "https://www.cnbc.com/2025/08/30/elliott-sees-opportunities-to-create-value-at-warehouse-reit-rexford-industrial-.html",
+      "sources": [
+        "https://www.cnbc.com/2025/08/30/elliott-sees-opportunities-to-create-value-at-warehouse-reit-rexford-industrial-.html"
+      ],
+      "first_seen": "2025-08-31T02:49:59.153983+00:00",
+      "last_seen": "2025-08-31T02:49:59.153983+00:00"
+    },
+    {
+      "title": "The 10 private colleges with the best ROI in the U.S.",
+      "summary_llm": "Princeton University delivers the best ROI among private colleges in the U.S., according to The Princeton Review's latest rankings . The publication considered financial aid, academic rigor and admissions selectivity to determine the colleges that deliver the best value .",
+      "sentiment": "negative",
+      "mention_count": 1,
+      "mention_count_domains": 1,
+      "domains": [
+        "cnbc.com"
+      ],
+      "canonical_url": "https://www.cnbc.com/2025/08/30/us-private-colleges-best-roi.html",
+      "sources": [
+        "https://www.cnbc.com/2025/08/30/us-private-colleges-best-roi.html"
+      ],
+      "first_seen": "2025-08-31T02:49:59.154436+00:00",
+      "last_seen": "2025-08-31T02:49:59.154436+00:00"
+    },
+    {
+      "title": "Core inflation rose to 2.9% in July, highest since February",
+      "summary_llm": "Core inflation rose to 2.9% in July, highest since February . That was up 0.1 percentage point from the June level, but in line with the Dow Jones consensus forecast . The Fed uses the PCE price index as its primary forecasting tool . Central bankers target inflation at 2%, so Friday's report shows the economy still a distance from that level .",
+      "sentiment": "negative",
+      "mention_count": 1,
+      "mention_count_domains": 1,
+      "domains": [
+        "cnbc.com"
+      ],
+      "canonical_url": "https://www.cnbc.com/2025/08/29/pce-inflation-report-july-2025.html",
+      "sources": [
+        "https://www.cnbc.com/2025/08/29/pce-inflation-report-july-2025.html"
+      ],
+      "first_seen": "2025-08-31T02:49:59.154783+00:00",
+      "last_seen": "2025-08-31T02:49:59.154783+00:00"
+    }
+  ],
+  "stats": {
+    "items_ingested": 98,
+    "groups": 95,
+    "feeds": [
+      "http://feeds.bbci.co.uk/news/rss.xml",
+      "https://www.cnbc.com/id/100003114/device/rss/rss.html",
+      "https://feeds.finance.yahoo.com/rss/2.0/headline?s=^GSPC&region=US&lang=en-US",
+      "https://www.investing.com/rss/news.rss"
+    ],
+    "similarity_threshold": 0.72,
+    "summarizer": "hf",
+    "hf_model": "sshleifer/distilbart-cnn-12-6",
+    "max_age_hours": 48
+  }
+}
