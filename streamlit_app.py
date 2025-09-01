@@ -175,8 +175,9 @@ if summarize_btn:
         st.session_state["last_report"] = payload
         status.update(label="Done.", state="complete")
 
-    with tab_top:
-        render_report(st.session_state["last_report"])
+        # with tab_top:
+        #     render_report(st.session_state["last_report"])
+        st.rerun()
 
 # ---------- Auto-load last report on startup ----------
 if "last_report" not in st.session_state:
