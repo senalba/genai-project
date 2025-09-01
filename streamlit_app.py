@@ -1,10 +1,14 @@
+# streamline.py
+import json
 import os
 import sys
+import html
 from urllib.parse import urlparse
 
+import pandas as pd
 import streamlit as st
 
-# Make sure we can import from ./src
+# Make project modules importable
 sys.path.append(os.path.dirname(__file__))
 
 from src.main import (  # noqa: E402
@@ -13,145 +17,213 @@ from src.main import (  # noqa: E402
     build_embeddings,
     greedy_clusters,
     build_stories,
-    summarize_selected,
+    select_top_overall,
+    assemble_report_payload,
+    update_titles_cache,
+    update_articles_cache,
+    load_articles_map,
 )
 
-st.set_page_config(page_title="News Impact (Baseline)", layout="wide")
-st.title("News Impact — Top Positive/Negative")
+st.set_page_config(page_title="News Impact", layout="wide")
+st.title("News Impact — Top Most-Mentioned Stories (distinct outlets)")
 
-# -------- Sidebar controls --------
-st.sidebar.header("Controls")
 
-# Feed picker
+# ---------- helpers ----------
 def _label(u: str) -> str:
     d = urlparse(u).netloc.lower()
-    if d.startswith("www."):
-        d = d[4:]
-    return f"{d}"
+    return d[4:] if d.startswith("www.") else d
 
-default_feeds = FEEDS
-selected = st.sidebar.multiselect(
-    "RSS feeds",
-    options=default_feeds,
-    default=default_feeds,
-    format_func=_label,
+
+@st.cache_data(show_spinner=False)
+def load_json(path: str):
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def titles_cache_df(path="out/titles_cache.json") -> pd.DataFrame:
+    if not os.path.exists(path):
+        return pd.DataFrame(
+            columns=["title", "url", "source", "domain", "published_at"]
+        )
+    data = load_json(path)
+    items = data.get("items", [])
+    return pd.DataFrame(items)
+
+
+# ---------- sidebar controls ----------
+st.sidebar.header("Controls")
+
+selected_feeds = st.sidebar.multiselect(
+    "RSS feeds", options=FEEDS, default=FEEDS, format_func=_label
 )
 
-# Params
-max_items = st.sidebar.number_input("Max items", min_value=100, max_value=1500, value=600, step=50)
-max_age_hours = st.sidebar.number_input("Max age (hours)", min_value=6, max_value=168, value=48, step=6)
-sim_thr = st.sidebar.slider("Similarity threshold", min_value=0.60, max_value=0.90, value=0.72, step=0.01)
-topk = st.sidebar.slider("Top-K per sentiment", min_value=1, max_value=10, value=5, step=1)
-min_domains = st.sidebar.slider("Min distinct domains per story", min_value=1, max_value=4, value=2, step=1)
+max_items = st.sidebar.number_input(
+    "Max items (ingest)", min_value=50, max_value=2000, value=600, step=50
+)
+max_age_hours = st.sidebar.number_input(
+    "Max age (hours)", min_value=6, max_value=720, value=48, step=6
+)
+sim_thr = st.sidebar.slider("Similarity threshold", 0.60, 0.90, 0.72, 0.01)
+topk = st.sidebar.slider("Top-N stories", 1, 10, 5, 1)
 
-# Summarizer
-hf_model = st.sidebar.selectbox(
-    "Summarizer model",
-    options=[
-        "sshleifer/distilbart-cnn-12-6",  # fast
-        "facebook/bart-large-cnn",
-        "google/pegasus-cnn_dailymail",
-    ],
+oa_model = st.sidebar.selectbox(
+    "OpenAI model",
+    ["gpt-4.1-mini", "gpt-4.1", "gpt-4o-mini", "gpt-4o"],
     index=0,
 )
-hf_device = st.sidebar.selectbox("Device", options=["auto", "mps", "cpu"], index=0)
 
-get_btn = st.sidebar.button("Get current top news", type="primary")
+article_timeout = st.sidebar.number_input("Article timeout (s)", 3, 30, 10, 1)
 
-# -------- Helpers for selection/ranking --------
-def select_top_with_min(stories, k=5, min_domains_req=2):
-    def score(s):
-        return (-s.get("mention_count_domains", 0), -s.get("mention_count", 0), s.get("first_seen") or "")
+update_btn = st.sidebar.button("Update cache", type="primary")
+summarize_btn = st.sidebar.button("Summarize", type="secondary")
 
-    good = [s for s in stories if s.get("mention_count_domains", 0) >= min_domains_req]
-    bad = [s for s in stories if s.get("mention_count_domains", 0) < min_domains_req]
+# ---------- tabs ----------
+tab_top, tab_titles = st.tabs(["Top stories", "All titles"])
 
-    pos = sorted([s for s in good if s["sentiment"] == "positive"], key=score)[:k]
-    neg = sorted([s for s in good if s["sentiment"] == "negative"], key=score)[:k]
-
-    if len(pos) < k:
-        pos += sorted([s for s in bad if s["sentiment"] == "positive"], key=score)[: k - len(pos)]
-    if len(neg) < k:
-        neg += sorted([s for s in bad if s["sentiment"] == "negative"], key=score)[: k - len(neg)]
-    return pos, neg
-
-# -------- Main action --------
-if get_btn:
-    if not selected:
-        st.warning("Pick at least one RSS feed.")
-        st.stop()
-
-    with st.status("Fetching & processing…", expanded=False) as status:
-        # 1) Ingest
-        df = ingest(selected, max_items=max_items, max_age_hours=max_age_hours)
+# ---------- Update cache ----------
+if update_btn:
+    with st.status("Updating cache…", expanded=False) as status:
+        # Ingest with fallback
+        df = ingest(
+            selected_feeds,
+            max_items=int(max_items),
+            max_age_hours=int(max_age_hours),
+            allow_undated=False,
+        )
         if df.empty:
-            status.update(label="No fresh items found.", state="error")
+            df = ingest(
+                selected_feeds,
+                max_items=int(max_items),
+                max_age_hours=max(168, int(max_age_hours)),
+                allow_undated=True,
+            )
+        if df.empty:
+            status.update(label="No items to cache.", state="error")
             st.stop()
 
-        # 2) Embed + cluster
-        X = build_embeddings(df)
-        groups = greedy_clusters(X, thr=sim_thr)
+        st.sidebar.caption(f"Fetched rows: {len(df)} (after filters)")
 
-        # 3) Build stories
-        stories = build_stories(df, groups)
+        added_titles, total_titles = update_titles_cache(df, out_dir="out")
+        st.sidebar.success(f"Titles cache: +{added_titles} (total {total_titles})")
 
-        # 4) Select Top-K with min-domain constraint
-        top_pos, top_neg = select_top_with_min(stories, k=topk, min_domains_req=min_domains)
+        added_bodies, total_bodies = update_articles_cache(
+            df, out_dir="out", timeout=int(article_timeout)
+        )
+        st.sidebar.success(f"Articles cache: +{added_bodies} (total {total_bodies})")
 
-        # 5) Summarize Top-K (article body)
-        summarize_selected(top_pos, summarizer="hf", hf_model=hf_model, hf_device=hf_device)
-        summarize_selected(top_neg, summarizer="hf", hf_model=hf_model, hf_device=hf_device)
+        status.update(label="Cache updated.", state="complete")
 
+
+# ---------- Summarize from cache ----------
+def render_report(rep: dict):
+    items = rep.get("items", [])
+    topN = rep.get("topN", 5)  # default to 5
+    st.subheader(f"Top {topN} most-mentioned stories (by distinct outlets)")
+    for item in items:
+        with st.container(border=True):
+            st.markdown(f"#### {item.get('summary_title','(no title)')}")
+            st.write(item.get("summary", ""))
+            stats = item.get("stats", {})
+            st.caption(
+                f"outlets: {stats.get('distinct_outlets','?')} · "
+                f"first seen: {stats.get('first_seen') or '–'}"
+            )
+            for u in item.get("links", []):
+                st.markdown(f"- [{_label(u)}]({u})")
+
+
+if summarize_btn:
+    with st.status(
+        "Summarizing from cached titles (OpenAI)…", expanded=False
+    ) as status:
+        tdf = titles_cache_df("out/titles_cache.json")
+        if tdf.empty:
+            status.update(
+                label="No cached titles. Click **Update cache** first.", state="error"
+            )
+            st.stop()
+
+        tdf["published_at"] = pd.to_datetime(
+            tdf["published_at"], utc=True, errors="coerce"
+        )
+        cutoff = pd.Timestamp.utcnow() - pd.Timedelta(hours=int(max_age_hours))
+        adf = tdf[tdf["published_at"] >= cutoff].copy()
+        if adf.empty:
+            adf = tdf.copy()
+
+        adf["summary_hint"] = ""
+        adf["source"] = adf["source"].fillna("")
+
+        X = build_embeddings(adf)
+        groups = greedy_clusters(X, thr=float(sim_thr))
+        stories = build_stories(adf, groups)
+
+        top = select_top_overall(stories, k=int(topk))
+
+        articles_map = load_articles_map("out")
+        payload = assemble_report_payload(
+            top,
+            summarizer="openai",
+            oa_model=oa_model,
+            articles_map=articles_map,
+        )
+
+        os.makedirs("out", exist_ok=True)
+        with open("out/report.json", "w", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False, indent=2)
+
+        st.session_state["last_report"] = payload
         status.update(label="Done.", state="complete")
 
-    # -------- Render results --------
-    col1, col2 = st.columns(2, gap="large")
+    with tab_top:
+        render_report(st.session_state["last_report"])
 
-    with col1:
-        st.subheader(f"Top {len(top_pos)} Positive")
-        if not top_pos:
-            st.info("No positive stories matched the filters.")
-        for s in top_pos:
-            with st.container(border=True):
-                st.markdown(f"#### {s['title']}")
-                st.write(s.get("summary_llm") or "")
-                st.caption(
-                    f"mentions: {s.get('mention_count',0)} · domains: {s.get('mention_count_domains',0)} · "
-                    f"first seen: {s.get('first_seen','–')}"
-                )
-                if s.get("canonical_url"):
-                    st.link_button("Open article", s["canonical_url"], use_container_width=True, type="secondary")
-                if s.get("domains"):
-                    st.caption("Sources: " + ", ".join(s["domains"][:6]))
+# ---------- Auto-load last report on startup ----------
+if "last_report" not in st.session_state:
+    rpt_path = "out/report.json"
+    if os.path.exists(rpt_path):
+        try:
+            st.session_state["last_report"] = load_json(rpt_path)
+        except Exception:
+            pass
 
-    with col2:
-        st.subheader(f"Top {len(top_neg)} Negative")
-        if not top_neg:
-            st.info("No negative stories matched the filters.")
-        for s in top_neg:
-            with st.container(border=True):
-                st.markdown(f"#### {s['title']}")
-                st.write(s.get("summary_llm") or "")
-                st.caption(
-                    f"mentions: {s.get('mention_count',0)} · domains: {s.get('mention_count_domains',0)} · "
-                    f"first seen: {s.get('first_seen','–')}"
-                )
-                if s.get("canonical_url"):
-                    st.link_button("Open article", s["canonical_url"], use_container_width=True, type="secondary")
-                if s.get("domains"):
-                    st.caption("Sources: " + ", ".join(s["domains"][:6]))
+if st.session_state.get("last_report"):
+    with tab_top:
+        render_report(st.session_state["last_report"])
 
-    # Stats
-    with st.expander("Run stats"):
-        st.json(
-            {
-                "items_ingested": int(len(df)),
-                "groups": int(len(groups)),
-                "feeds_used": [_label(u) for u in selected],
-                "similarity_threshold": sim_thr,
-                "max_age_hours": max_age_hours,
-            }
-        )
-else:
-    st.info("Pick feeds on the left, then click **Get current top news**.")
+# ---------- All titles tab ----------
+with tab_titles:
+    cache_path = "out/titles_cache.json"
+    if not os.path.exists(cache_path):
+        st.info("No titles cache yet. Click **Update cache**.")
+    else:
+        data = load_json(cache_path)
+        items = data.get("items", [])
+        if not items:
+            st.info("Titles cache is empty.")
+        else:
+            by_source = {}
+            for it in items:
+                by_source.setdefault(it.get("source", "(unknown)"), []).append(it)
 
+            srcs = sorted(by_source.keys())
+            sel = st.multiselect("Filter outlets", options=srcs, default=srcs)
+            for source in sel:
+                arr = by_source.get(source, [])
+                if not arr:
+                    continue
+                with st.expander(f"{source} — {len(arr)} titles", expanded=False):
+                    for it in sorted(
+                        arr, key=lambda x: x.get("published_at") or "", reverse=True
+                    ):
+                        url = it.get("url", "")
+                        title = it.get("title", "")
+                        ts = it.get("published_at", "—")
+                        dom = it.get("domain", "")
+                        st.markdown(
+                            f"<div style='margin:6px 0'>"
+                            f"<a href='{html.escape(url)}' target='_blank'>{html.escape(title)}</a><br>"
+                            f"<span style='color:gray;font-size:0.9em'>{ts} · {dom}</span>"
+                            f"</div>",
+                            unsafe_allow_html=True,
+                        )
