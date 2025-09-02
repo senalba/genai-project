@@ -29,6 +29,12 @@ from src.main import (
     load_articles_map,
     translate_needed_titles,
     translate_needed_bodies,
+    get_recent_titles_df,
+    openai_select_by_topic,
+    openai_topic_summary,
+    load_or_generate_topic_summary,
+    load_or_translate_topic_summary,
+    topic_summary_paths,
 )
 
 st.set_page_config(page_title="News Impact", layout="wide")
@@ -99,7 +105,10 @@ update_btn = st.sidebar.button("Update cache", type="primary")
 summarize_btn = st.sidebar.button("Summarize", type="secondary")
 
 # ---------- tabs ----------
-tab_top, tab_titles = st.tabs(["Top stories", "All titles"])
+tab_top, tab_titles, tab_war, tab_tech, tab_econ = st.tabs(
+    ["Top stories", "All titles", "Russo-Ukrainian War", "Technologies", "Economics"]
+)
+
 
 # ---------- Update cache ----------
 if update_btn:
@@ -121,10 +130,12 @@ if update_btn:
             df, out_dir="out", timeout=int(article_timeout)
         )
 
-        # 3) Translate (idempotent; only new/changed items get sent to OpenAI)
-        # Titles first (cheap), then bodies (optional but you said “everything”)
-        tx_titles_new, _ = translate_needed_titles(out_dir="out", model=oa_model)
-        tx_bodies_new, _ = translate_needed_bodies(out_dir="out", model=oa_model)
+        ## 3) Translate (idempotent; only new/changed items)
+        tx_titles_new = tx_bodies_new = 0
+        if translate_titles:
+            tx_titles_new, _ = translate_needed_titles(out_dir="out", model=oa_model)
+        if translate_bodies:
+            tx_bodies_new, _ = translate_needed_bodies(out_dir="out", model=oa_model)
 
         # 4) Bust Streamlit file cache so the UI sees the updated JSON files
         try:
@@ -197,6 +208,152 @@ def render_report(rep: dict):
                     + f"<a href='{html.escape(u)}' target='_blank'>{html.escape(title)}</a>",
                     unsafe_allow_html=True,
                 )
+
+
+def render_topic_tab(container, topic_key: str, topic_label: str):
+    with container:
+        st.subheader(topic_label)
+
+        col_lang, col_gen, col_limit = st.columns([1.2, 1, 1])
+        with col_lang:
+            summary_lang = st.radio(
+                "Summary language",
+                options=["English", "Українська"],
+                index=0,
+                horizontal=True,
+                key=f"lang_{topic_key}",
+            )
+        with col_gen:
+            gen = st.button(f"Generate — {topic_label}", key=f"btn_{topic_key}")
+        with col_limit:
+            max_titles_for_topic = st.number_input(
+                "Max titles to send",
+                min_value=50,
+                max_value=800,
+                value=min(int(max_items), 400),
+                step=50,
+                key=f"lim_{topic_key}",
+            )
+
+        # If user clicked "Generate"
+        if gen:
+            with st.status(
+                f"Selecting and summarizing for '{topic_label}'…", expanded=False
+            ) as status:
+                # Ensure English titles exist (idempotent) if checkbox is on
+                try:
+                    if translate_titles:
+                        translate_needed_titles(out_dir="out", model=oa_model)
+                except Exception:
+                    pass
+
+                # Load recent titles
+                tdf = get_recent_titles_df(
+                    out_dir="out", max_age_hours=int(max_age_hours)
+                )
+                if tdf.empty:
+                    status.update(label="No recent titles available.", state="error")
+                    st.stop()
+
+                # Ask OpenAI to pick relevant items
+                try:
+                    picked = openai_select_by_topic(
+                        tdf=tdf,
+                        topic=topic_label,
+                        oa_model=oa_model,
+                        max_titles=int(max_titles_for_topic),
+                    )
+                except RuntimeError as e:
+                    status.update(label=str(e), state="error")
+                    st.stop()
+
+                if picked.empty:
+                    status.update(
+                        label="No relevant items found by the model.", state="error"
+                    )
+                    st.stop()
+
+                # Summarize with article texts, BUT reuse EN file if it already exists
+                articles_map = load_articles_map("out")
+                out = load_or_generate_topic_summary(
+                    selected_df=picked,
+                    articles_map=articles_map,
+                    topic=topic_label,
+                    oa_model=oa_model,
+                    out_dir="out",
+                )
+
+                # Cache in session (EN summary, items, file path)
+                st.session_state.setdefault("topic_reports", {})[topic_key] = {
+                    "summary_md": out.get("summary_md", ""),  # EN
+                    "summary_md_uk": None,  # UA (lazy)
+                    "items": picked.to_dict(orient="records"),
+                    "path": out.get("path"),
+                }
+                status.update(label="Done.", state="complete")
+
+        # Render last result (and translate on toggle if needed, with file reuse)
+        data = st.session_state.get("topic_reports", {}).get(topic_key)
+        if data:
+            text_en = data.get("summary_md", "") or ""
+
+            # If user wants UA, try to load .uk.txt; if missing, translate now and save
+            if summary_lang == "Українська":
+                if not data.get("summary_md_uk") and text_en:
+                    with st.status("Translating summary to Ukrainian…", expanded=False):
+                        ua_text, ua_path = load_or_translate_topic_summary(
+                            topic=topic_label,
+                            en_text=text_en,
+                            oa_model=oa_model,
+                            out_dir="out",
+                        )
+                        data["summary_md_uk"] = ua_text
+                        data["path_uk"] = ua_path
+                        st.session_state["topic_reports"][topic_key] = data
+                to_show = data.get("summary_md_uk") or text_en
+            else:
+                # If EN file exists, ensure we load from disk in case the app restarted
+                en_path, _ = topic_summary_paths(topic_label, out_dir="out")
+                if os.path.exists(en_path) and not text_en:
+                    try:
+                        with open(en_path, "r", encoding="utf-8") as f:
+                            data["summary_md"] = f.read()
+                            st.session_state["topic_reports"][topic_key] = data
+                    except Exception:
+                        pass
+                to_show = data.get("summary_md", "")
+
+            st.markdown(to_show)
+
+            st.markdown("**Посилання:**")
+            for it in data.get("items", []):
+                dom = str(it.get("regdom") or it.get("domain") or "")
+                title = it.get("title_en") or it.get("title") or "(no title)"
+                url = it.get("url") or ""
+                st.markdown(f"- [{dom.upper()}] [{title}]({url})")
+
+            # Download EN (and UA if present) saved files
+            en_path, uk_path = topic_summary_paths(topic_label, out_dir="out")
+            if os.path.exists(en_path):
+                with open(en_path, "rb") as fh:
+                    st.download_button(
+                        "Download English summary (.txt)",
+                        fh,
+                        file_name=os.path.basename(en_path),
+                        mime="text/plain",
+                        use_container_width=True,
+                        key=f"dl_en_{topic_key}",
+                    )
+            if os.path.exists(uk_path):
+                with open(uk_path, "rb") as fh:
+                    st.download_button(
+                        "Завантажити український підсумок (.txt)",
+                        fh,
+                        file_name=os.path.basename(uk_path),
+                        mime="text/plain",
+                        use_container_width=True,
+                        key=f"dl_uk_{topic_key}",
+                    )
 
 
 if summarize_btn:
@@ -364,3 +521,12 @@ with tab_titles:
                                         f"</div>",
                                         unsafe_allow_html=True,
                                     )
+
+with tab_war:
+    render_topic_tab(tab_war, topic_key="war", topic_label="Russo-Ukrainian War")
+
+with tab_tech:
+    render_topic_tab(tab_tech, topic_key="tech", topic_label="Technologies")
+
+with tab_econ:
+    render_topic_tab(tab_econ, topic_key="econ", topic_label="Economics")

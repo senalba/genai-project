@@ -8,6 +8,7 @@ import os
 import re
 from typing import Any, Dict, List, Tuple, cast
 from urllib.parse import urlparse
+from functools import lru_cache
 
 from dotenv import load_dotenv
 
@@ -28,6 +29,7 @@ from transformers import (
 )
 
 import logging
+from openai import OpenAI
 
 LOG = logging.getLogger("newsimpact")
 
@@ -83,6 +85,17 @@ hf_logging.set_verbosity_error()
 UA_HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Apple Silicon) NewsImpact/0.2"}
 
 
+@lru_cache(maxsize=1)
+def get_openai_client() -> OpenAI:
+    key = os.getenv("OPENAI_API_KEY", "").strip()
+    if not key:
+        raise RuntimeError(
+            "OPENAI_API_KEY is not set. Add it to your .env or export it in the shell "
+            "(e.g., export OPENAI_API_KEY=sk-...)"
+        )
+    return OpenAI(api_key=key)
+
+
 # ----------------------------- Helpers -----------------------------
 def _domain(u: str) -> str:
     d = urlparse(u).netloc.lower()
@@ -96,14 +109,23 @@ except Exception:
     tldextract = None
 
 
-def registrable_domain(host: str) -> str:
+def _slugify_topic(topic: str) -> str:
+    s = (topic or "topic").strip().lower()
+    s = re.sub(r"\s+", "_", s)
+    s = re.sub(r"[^a-z0-9_\-]+", "", s)
+    return s or "topic"
+
+
+def _date_str_utc() -> str:
+    return pd.Timestamp.utcnow().strftime("%Y-%m-%d")
+
+
+def registrable_domain(host_or_url: str) -> str:
+    host = urlparse(host_or_url).netloc if "://" in host_or_url else host_or_url
     if not host:
         return ""
-    if tldextract:
-        ext = tldextract.extract(host)
-        return ".".join([p for p in (ext.domain, ext.suffix) if p]) or host
-    parts = host.split(".")
-    return ".".join(parts[-2:]) if len(parts) >= 2 else host
+    ext = tldextract.extract(host)
+    return ".".join([p for p in [ext.domain, ext.suffix] if p])
 
 
 def sha1_text(text: str) -> str:
@@ -206,6 +228,169 @@ def ingest(
     )
     LOG.info("Ingest after filters: dated=%d, final=%d", len(dated), len(out))
     return out
+
+
+def topic_summary_paths(
+    topic: str, out_dir: str = "out", date_str: str | None = None
+) -> tuple[str, str]:
+    """Return (en_path, uk_path) for given topic/date."""
+    os.makedirs(out_dir, exist_ok=True)
+    date_str = date_str or _date_str_utc()
+    slug = _slugify_topic(topic)
+    en_path = os.path.join(out_dir, f"summary_{slug}_{date_str}.en.txt")
+    uk_path = os.path.join(out_dir, f"summary_{slug}_{date_str}.uk.txt")
+    return en_path, uk_path
+
+
+def _read_text_if_exists(path: str) -> str | None:
+    try:
+        if os.path.exists(path):
+            with open(path, "r", encoding="utf-8") as f:
+                return f.read()
+    except Exception:
+        pass
+    return None
+
+
+def _write_topic_summary_txt(
+    topic: str,
+    summary_text: str,
+    urls: list[str] | None,
+    lang: str,
+    out_dir: str = "out",
+) -> str:
+    """Write summary to dated file with language suffix ('.en.txt' or '.uk.txt')."""
+    en_path, uk_path = topic_summary_paths(topic, out_dir=out_dir)
+    path = en_path if lang.lower().startswith("en") else uk_path
+    os.makedirs(out_dir, exist_ok=True)
+    body = []
+    body.append(f"Topic: {topic}")
+    body.append(f"Date (UTC): {_date_str_utc()}")
+    body.append(f"Language: {'EN' if lang.lower().startswith('en') else 'UK'}")
+    body.append("")
+    body.append(summary_text.strip())
+    if urls:
+        body.append("")
+        body.append("Sources:")
+        for u in urls:
+            body.append(str(u))
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("\n".join(body).strip() + "\n")
+    return path
+
+
+# Minimal translator using shared OpenAI client
+def openai_translate_text(
+    text: str, target_lang: str = "Ukrainian", oa_model: str = "gpt-4.1-mini"
+) -> str:
+    client = get_openai_client()
+    if not text.strip():
+        return ""
+    system = "Translate to the requested target language faithfully and concisely. Keep formatting when reasonable."
+    user = f"Target language: {target_lang}\n\nText:\n{text}"
+    resp = client.chat.completions.create(
+        model=oa_model,
+        temperature=0,
+        messages=[
+            {"role": "system", "content": system},
+            {"role": "user", "content": user},
+        ],
+    )
+    return (resp.choices[0].message.content or "").strip()
+
+
+def load_or_generate_topic_summary(
+    selected_df: pd.DataFrame,
+    articles_map: dict,
+    topic: str,
+    oa_model: str = "gpt-4.1-mini",
+    out_dir: str = "out",
+    max_chars_per_doc: int = 6000,
+) -> dict:
+    """
+    If EN summary file for topic/date exists -> load it.
+    Else -> generate via OpenAI, save .en.txt, and return.
+    """
+    en_path, _ = topic_summary_paths(topic, out_dir=out_dir)
+    existing = _read_text_if_exists(en_path)
+    urls = selected_df["url"].tolist() if not selected_df.empty else []
+    if existing:
+        return {"topic": topic, "summary_md": existing, "urls": urls, "path": en_path}
+
+    # Generate (reuse your logic from openai_topic_summary, but do not write twice)
+    client = get_openai_client()
+
+    def _body(rec):
+        if rec is None:
+            return ""
+        if isinstance(rec, dict):
+            return rec.get("body_en") or rec.get("body") or ""
+        return str(rec)
+
+    docs = []
+    for _, r in selected_df.iterrows():
+        url = r["url"]
+        title = str(r.get("title_en") or r.get("title") or "")
+        dom = str(r.get("regdom") or r.get("domain") or "")
+        body = _body(articles_map.get(url)) or title
+        docs.append(
+            f"### {dom}: {title}\nURL: {url}\n\n{(body or '')[:max_chars_per_doc]}\n"
+        )
+
+    if not docs:
+        return {
+            "topic": topic,
+            "summary_md": "_No relevant documents._",
+            "urls": [],
+            "path": None,
+        }
+
+    system = (
+        "You are an expert news analyst. Synthesize a comprehensive, neutral summary."
+    )
+    user = (
+        f"Topic: {topic}\n"
+        "Write a cohesive summary (~300–500 words) with key facts/dates, what happened, context, and implications. "
+        "End with a 'Sources' section listing the URLs.\n\n" + "\n\n---\n\n".join(docs)
+    )
+
+    resp = client.chat.completions.create(
+        model=oa_model,
+        temperature=0,
+        messages=[
+            {"role": "system", "content": system},
+            {"role": "user", "content": user},
+        ],
+    )
+    summary_en = (resp.choices[0].message.content or "").strip()
+
+    path = _write_topic_summary_txt(
+        topic=topic, summary_text=summary_en, urls=urls, lang="en", out_dir=out_dir
+    )
+    return {"topic": topic, "summary_md": summary_en, "urls": urls, "path": path}
+
+
+def load_or_translate_topic_summary(
+    topic: str,
+    en_text: str,
+    oa_model: str = "gpt-4.1-mini",
+    out_dir: str = "out",
+) -> tuple[str, str | None]:
+    """
+    If UA file exists -> load and return.
+    Else -> translate EN -> save .uk.txt -> return.
+    Returns (ua_text, ua_path).
+    """
+    _, uk_path = topic_summary_paths(topic, out_dir=out_dir)
+    existing = _read_text_if_exists(uk_path)
+    if existing:
+        return existing, uk_path
+
+    ua_text = openai_translate_text(en_text, target_lang="Ukrainian", oa_model=oa_model)
+    path = _write_topic_summary_txt(
+        topic=topic, summary_text=ua_text, urls=None, lang="uk", out_dir=out_dir
+    )
+    return ua_text, path
 
 
 # ------------------ Embeddings & Clustering ------------------
@@ -343,55 +528,50 @@ class OpenAIBase:
         self.client = OpenAI(api_key=api_key)
 
 
-class OpenAITranslator(OpenAIBase):
-    def __init__(self, model: str = "gpt-4.1-mini", temperature: float = 0.0):
-        super().__init__()
+# OpenAI translator
+class OpenAITranslator:
+    def __init__(self, model: str = "gpt-4.1-mini"):
         self.model = model
-        self.temperature = temperature
-        self.system = (
-            "Translate to clear, neutral, news-style English. "
-            "Preserve named entities, numbers, quotes, and factual content. "
-            "Do not summarize or omit details. Output only the translation."
-        )
+        self.client = get_openai_client()
 
-    def translate(self, texts: List[str]) -> List[str]:
-        out: List[str] = []
+    def translate(self, texts: list[str]) -> list[str]:
+        outs = []
         for t in texts:
             if not t:
-                out.append("")
+                outs.append("")
                 continue
             resp = self.client.chat.completions.create(
                 model=self.model,
-                temperature=self.temperature,
+                temperature=0,
                 messages=[
-                    {"role": "system", "content": self.system},
-                    {"role": "user", "content": t[:6000]},
+                    {
+                        "role": "system",
+                        "content": "Translate to English. Keep meaning; do not add info.",
+                    },
+                    {"role": "user", "content": t[:4000]},
                 ],
             )
-            out.append((resp.choices[0].message.content or "").strip())
-        return out
+            outs.append((resp.choices[0].message.content or "").strip())
+        return outs
 
 
-class OpenAISummarizer(OpenAIBase):
-    def __init__(self, model: str = "gpt-4.1-mini", temperature: float = 0.0):
-        super().__init__()
+class OpenAISummarizer:
+    def __init__(self, model: str = "gpt-4.1-mini"):
         self.model = model
-        self.temperature = temperature
-        self.system = (
-            "You are a meticulous news summarizer. "
-            "Given title and article body, write a neutral 2–3 sentence summary describing the event and key facts. "
-            "Avoid opinionated language."
-        )
+        self.client = get_openai_client()
 
-    def summarize(self, pieces: List[str]) -> str:
+    def summarize(self, pieces: list[str]) -> str:
         blob = " ".join(p for p in pieces if p).strip()
         if not blob:
             return ""
         resp = self.client.chat.completions.create(
             model=self.model,
-            temperature=self.temperature,
+            temperature=0,
             messages=[
-                {"role": "system", "content": self.system},
+                {
+                    "role": "system",
+                    "content": "You are a precise news summarizer. Write 2–3 neutral sentences.",
+                },
                 {"role": "user", "content": blob[:6000]},
             ],
         )
@@ -862,6 +1042,162 @@ def dump_article_texts(
         json.dump(payload, f, ensure_ascii=False, indent=2)
     print(f"[OK] Wrote {path}")
     return path
+
+
+def get_recent_titles_df(out_dir: str = "out", max_age_hours: int = 48) -> pd.DataFrame:
+    path = _titles_cache_path(out_dir)
+    if not os.path.exists(path):
+        return pd.DataFrame(
+            columns=["title", "title_en", "url", "domain", "published_at"]
+        )
+    with open(path, "r", encoding="utf-8") as f:
+        obj = json.load(f)
+    df = pd.DataFrame(obj.get("items", []))
+    if df.empty:
+        return df
+    df["published_at"] = pd.to_datetime(df["published_at"], utc=True, errors="coerce")
+    cutoff = pd.Timestamp.utcnow() - pd.Timedelta(hours=int(max_age_hours))
+    df = df[df["published_at"] >= cutoff].copy()
+    if "title_en" not in df.columns or not df["title_en"].notna().any():
+        df["title_en"] = df["title"]
+    if "domain" not in df.columns or not df["domain"].notna().any():
+        df["domain"] = df["url"].map(_domain)
+    df["regdom"] = df["domain"].map(registrable_domain)
+    return df.sort_values("published_at", ascending=False).reset_index(drop=True)
+
+
+def get_recent_titles_df(out_dir: str = "out", max_age_hours: int = 48) -> pd.DataFrame:
+    path = _titles_cache_path(out_dir)
+    if not os.path.exists(path):
+        return pd.DataFrame(
+            columns=["title", "title_en", "url", "domain", "published_at"]
+        )
+    with open(path, "r", encoding="utf-8") as f:
+        obj = json.load(f)
+    df = pd.DataFrame(obj.get("items", []))
+    if df.empty:
+        return df
+    df["published_at"] = pd.to_datetime(df["published_at"], utc=True, errors="coerce")
+    cutoff = pd.Timestamp.utcnow() - pd.Timedelta(hours=int(max_age_hours))
+    df = df[df["published_at"] >= cutoff].copy()
+    if "title_en" not in df.columns or not df["title_en"].notna().any():
+        df["title_en"] = df["title"]
+    if "domain" not in df.columns or not df["domain"].notna().any():
+        df["domain"] = df["url"].map(_domain)
+    df["regdom"] = df["domain"].map(registrable_domain)
+    return df.sort_values("published_at", ascending=False).reset_index(drop=True)
+
+
+def openai_select_by_topic(
+    tdf: pd.DataFrame,
+    topic: str,
+    oa_model: str = "gpt-4.1-mini",
+    max_titles: int = 400,
+) -> pd.DataFrame:
+    client = get_openai_client()
+    rows = tdf.head(int(max_titles)).reset_index(drop=True)
+
+    lines = []
+    for i, r in rows.iterrows():
+        title = str(r.get("title_en") or r.get("title") or "")[:220]
+        dom = str(r.get("regdom") or r.get("domain") or "")
+        lines.append(f"{i+1}. [{dom}] {title}")
+
+    system = (
+        "You are a precise news curator. Select ONLY items relevant to the given topic. "
+        "Return a pure JSON array of integers (IDs), nothing else."
+    )
+    user = (
+        f"Topic: {topic}\n"
+        "From the numbered list below, select ALL items that clearly match the topic. "
+        "Prefer concrete, on-topic headlines; avoid generic or unrelated items.\n\n"
+        + "\n".join(lines)
+        + "\n\nOutput: JSON array of selected IDs, e.g. [2,7,13]"
+    )
+
+    resp = client.chat.completions.create(
+        model=oa_model,
+        messages=[
+            {"role": "system", "content": system},
+            {"role": "user", "content": user},
+        ],
+        temperature=0,
+    )
+    txt = (resp.choices[0].message.content or "").strip()
+    try:
+        sel_ids = json.loads(txt)
+        if not isinstance(sel_ids, list):
+            sel_ids = []
+    except Exception:
+        import re
+
+        sel_ids = [int(x) for x in re.findall(r"\d+", txt)]
+    sel_ids = {i for i in sel_ids if 1 <= int(i) <= len(rows)}
+
+    picked = rows.iloc[[i - 1 for i in sel_ids]].copy()
+    if not picked.empty:
+        picked = picked.sort_values("published_at", ascending=False)
+        picked = picked.drop_duplicates(subset="regdom", keep="first").reset_index(
+            drop=True
+        )
+    return picked
+
+
+def openai_topic_summary(
+    selected_df: pd.DataFrame,
+    articles_map: dict,
+    topic: str,
+    oa_model: str = "gpt-4.1-mini",
+    max_chars_per_doc: int = 6000,
+) -> dict:
+    client = get_openai_client()
+
+    def _body(rec):
+        if rec is None:
+            return ""
+        if isinstance(rec, dict):
+            return rec.get("body_en") or rec.get("body") or ""
+        return str(rec)
+
+    docs = []
+    urls = []
+    for _, r in selected_df.iterrows():
+        url = r["url"]
+        urls.append(url)
+        title = str(r.get("title_en") or r.get("title") or "")
+        dom = str(r.get("regdom") or r.get("domain") or "")
+        body = _body(articles_map.get(url)) or title
+        docs.append(f"### {dom}: {title}\nURL: {url}\n\n{body[:max_chars_per_doc]}\n")
+
+    if not docs:
+        return {
+            "topic": topic,
+            "summary_md": "_Немає релевантних матеріалів._",
+            "urls": [],
+        }
+
+    system = (
+        "You are an expert news analyst. Synthesize a comprehensive, neutral summary.\n"
+        "Be factual, avoid repetition, attribute carefully, avoid speculation."
+    )
+    user = (
+        f"Topic: {topic}\n"
+        "Using the documents below, write a cohesive summary (≈300–500 words): "
+        "ключові факти/дати, що сталося, контекст, наслідки. "
+        "Наприкінці додай розділ 'Джерела' зі списком URL.\n\n"
+        + "\n\n---\n\n".join(docs)
+    )
+
+    resp = client.chat.completions.create(
+        model=oa_model,
+        messages=[
+            {"role": "system", "content": system},
+            {"role": "user", "content": user},
+        ],
+        temperature=0,
+    )
+    summary = (resp.choices[0].message.content or "").strip()
+    return {"topic": topic, "summary_md": summary, "urls": urls}
 
 
 # --- run (CLI orchestration) ---
