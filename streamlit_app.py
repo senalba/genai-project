@@ -8,6 +8,11 @@ from urllib.parse import urlparse
 import pandas as pd
 import streamlit as st
 
+try:
+    import tldextract
+except Exception:
+    tldextract = None
+
 # Make project modules importable
 sys.path.append(os.path.dirname(__file__))
 
@@ -29,6 +34,18 @@ st.title("News Impact — Top Most-Mentioned Stories (distinct outlets)")
 
 
 # ---------- helpers ----------
+
+
+def registrable_domain(host: str) -> str:
+    if not host:
+        return ""
+    if tldextract:
+        ext = tldextract.extract(host)
+        return ".".join([p for p in (ext.domain, ext.suffix) if p]) or host
+    parts = host.split(".")
+    return ".".join(parts[-2:]) if len(parts) >= 2 else host
+
+
 def _label(u: str) -> str:
     d = urlparse(u).netloc.lower()
     return d[4:] if d.startswith("www.") else d
@@ -58,7 +75,7 @@ selected_feeds = st.sidebar.multiselect(
 )
 
 max_items = st.sidebar.number_input(
-    "Max items (ingest)", min_value=50, max_value=2000, value=600, step=50
+    "Max items (ingest)", min_value=50, max_value=2000, value=1600, step=50
 )
 max_age_hours = st.sidebar.number_input(
     "Max age (hours)", min_value=6, max_value=720, value=48, step=6
@@ -88,7 +105,7 @@ if update_btn:
             selected_feeds,
             max_items=int(max_items),
             max_age_hours=int(max_age_hours),
-            allow_undated=False,
+            allow_undated=True,
         )
         if df.empty:
             df = ingest(
@@ -119,17 +136,50 @@ def render_report(rep: dict):
     items = rep.get("items", [])
     topN = rep.get("topN", 5)  # default to 5
     st.subheader(f"Top {topN} most-mentioned stories (by distinct outlets)")
+
+    # Build a quick lookup from the titles cache: url -> (title, registrable domain)
+    url_to_title = {}
+    url_to_regdom = {}
+    try:
+        cache = load_json("out/titles_cache.json")
+        for it in cache.get("items", []):
+            u = it.get("url", "")
+            if not u:
+                continue
+            title = it.get("title") or ""
+            dom = it.get("domain") or urlparse(u).netloc.lower()
+            dom = dom[4:] if dom.startswith("www.") else dom
+            reg = registrable_domain(dom)
+            url_to_title[u] = title
+            url_to_regdom[u] = reg
+    except Exception:
+        pass  # fail soft; we’ll still render with fallbacks
+
     for item in items:
         with st.container(border=True):
             st.markdown(f"#### {item.get('summary_title','(no title)')}")
             st.write(item.get("summary", ""))
+
             stats = item.get("stats", {})
             st.caption(
                 f"outlets: {stats.get('distinct_outlets','?')} · "
                 f"first seen: {stats.get('first_seen') or '–'}"
             )
+
+            # Render each link as: **[REGDOM]** Title (linked)
             for u in item.get("links", []):
-                st.markdown(f"- [{_label(u)}]({u})")
+                # fallbacks if cache didn’t have this URL
+                host = urlparse(u).netloc.lower()
+                host = host[4:] if host.startswith("www.") else host
+                reg = url_to_regdom.get(u) or registrable_domain(host)
+                title = url_to_title.get(u) or "(title unavailable)"
+
+                st.markdown(
+                    "- "  # bullet
+                    + f"<strong>[{html.escape(reg.upper())}]</strong> "
+                    + f"<a href='{html.escape(u)}' target='_blank'>{html.escape(title)}</a>",
+                    unsafe_allow_html=True,
+                )
 
 
 if summarize_btn:
@@ -203,28 +253,97 @@ with tab_titles:
         if not items:
             st.info("Titles cache is empty.")
         else:
-            by_source = {}
-            for it in items:
-                by_source.setdefault(it.get("source", "(unknown)"), []).append(it)
+            # Helper: registrable domain (eTLD+1), e.g., sport.nv.ua -> nv.ua, edition.cnn.com -> cnn.com
+            try:
+                import tldextract
+            except Exception:
+                tldextract = None
 
-            srcs = sorted(by_source.keys())
-            sel = st.multiselect("Filter outlets", options=srcs, default=srcs)
-            for source in sel:
-                arr = by_source.get(source, [])
+            def registrable_domain(host: str) -> str:
+                if not host:
+                    return ""
+                if tldextract:
+                    ext = tldextract.extract(host)
+                    return ".".join([p for p in (ext.domain, ext.suffix) if p]) or host
+                parts = host.split(".")
+                return ".".join(parts[-2:]) if len(parts) >= 2 else host
+
+            from urllib.parse import urlparse as _urlparse
+
+            # Ensure domain + registrable domain on every item
+            for it in items:
+                host = _urlparse(it.get("url", "")).netloc.lower()
+                host = host[4:] if host.startswith("www.") else host
+                it["domain"] = it.get("domain") or host
+                it["regdom"] = registrable_domain(it["domain"])
+
+            # Group by registrable domain (site), then by full host (subdomain)
+            by_regdom = {}
+            for it in items:
+                by_regdom.setdefault(it["regdom"], []).append(it)
+
+            regdoms = sorted(by_regdom.keys())
+            sel = st.multiselect(
+                "Filter outlets (by site)", options=regdoms, default=regdoms
+            )
+
+            for reg in sel:
+                arr = by_regdom.get(reg, [])
                 if not arr:
                     continue
-                with st.expander(f"{source} — {len(arr)} titles", expanded=False):
-                    for it in sorted(
-                        arr, key=lambda x: x.get("published_at") or "", reverse=True
+
+                # Group inside this site by full host
+                by_host = {}
+                for it in arr:
+                    by_host.setdefault(it["domain"], []).append(it)
+
+                subdomains = sorted(by_host.keys())
+                total_titles = sum(len(v) for v in by_host.values())
+
+                # If only the root host exists, render a single level (no "root" nesting)
+                if len(subdomains) == 1 and subdomains[0] == reg:
+                    bucket = by_host[reg]
+                    with st.expander(f"{reg} — {len(bucket)}", expanded=False):
+                        for it in sorted(
+                            bucket,
+                            key=lambda x: x.get("published_at") or "",
+                            reverse=True,
+                        ):
+                            url = it.get("url", "")
+                            title = it.get("title", "")
+                            ts = it.get("published_at", "—")
+                            st.markdown(
+                                f"<div style='margin:6px 0'>"
+                                f"<a href='{html.escape(url)}' target='_blank'>{html.escape(title)}</a><br>"
+                                f"<span style='color:gray;font-size:0.9em'>{ts}</span>"
+                                f"</div>",
+                                unsafe_allow_html=True,
+                            )
+                else:
+                    # Otherwise: show site -> subdomain(s) hierarchy; root first if present
+                    ordered = sorted(subdomains, key=lambda d: (d != reg, d))
+                    with st.expander(
+                        f"{reg} — {total_titles} titles across {len(subdomains)} subdomain(s)",
+                        expanded=False,
                     ):
-                        url = it.get("url", "")
-                        title = it.get("title", "")
-                        ts = it.get("published_at", "—")
-                        dom = it.get("domain", "")
-                        st.markdown(
-                            f"<div style='margin:6px 0'>"
-                            f"<a href='{html.escape(url)}' target='_blank'>{html.escape(title)}</a><br>"
-                            f"<span style='color:gray;font-size:0.9em'>{ts} · {dom}</span>"
-                            f"</div>",
-                            unsafe_allow_html=True,
-                        )
+                        for host in ordered:
+                            bucket = by_host[host]
+                            pretty = f"{reg} (root)" if host == reg else host
+                            with st.expander(
+                                f"{pretty} — {len(bucket)}", expanded=False
+                            ):
+                                for it in sorted(
+                                    bucket,
+                                    key=lambda x: x.get("published_at") or "",
+                                    reverse=True,
+                                ):
+                                    url = it.get("url", "")
+                                    title = it.get("title", "")
+                                    ts = it.get("published_at", "—")
+                                    st.markdown(
+                                        f"<div style='margin:6px 0'>"
+                                        f"<a href='{html.escape(url)}' target='_blank'>{html.escape(title)}</a><br>"
+                                        f"<span style='color:gray;font-size:0.9em'>{ts}</span>"
+                                        f"</div>",
+                                        unsafe_allow_html=True,
+                                    )

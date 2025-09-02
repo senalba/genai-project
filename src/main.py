@@ -40,10 +40,11 @@ EN_FEEDS = [
 
 UA_FEEDS = [
     # ("Ukrainska Pravda (UA)", "https://www.pravda.com.ua/rss/"),
-    ("Ukrainska Pravda (EN)", "https://www.pravda.com.ua/eng/rss/"),
-    ("Ekonomichna Pravda", "https://www.epravda.com.ua/rss/"),
+    # ("Ukrainska Pravda (EN)", "https://www.pravda.com.ua/eng/rss/"),
+    # ("Ekonomichna Pravda", "https://www.epravda.com.ua/rss/"),
     # ("European Pravda (EN)", "https://www.eurointegration.com.ua/eng/rss/"),
-    ("NV.ua – All news", "https://nv.ua/ukr/rss/allnews.xml"),
+    ("NV.ua – All news", "https://nv.ua/ukr/rss/all.xml"),
+    # ("Censor.NET (UA)", "https://assets.censor.net/rss/censor.net/rss_uk_news.xml"),
     # ("Korrespondent.net – All", "https://korrespondent.net/rss"),
     # ("RBC-Ukraine – All", "https://www.rbc.ua/static/rss/all.news.xml"),
     # ("BBC News Україна", "https://www.bbc.com/ukrainian/index.xml"),
@@ -609,7 +610,7 @@ def parse_args():
         "--titles-dir", default="out", help="Where to write snapshots/caches"
     )
     p.add_argument(
-        "--max-items", type=int, default=600, help="Max feed items to process"
+        "--max-items", type=int, default=1600, help="Max feed items to process"
     )
     p.add_argument("--topk", type=int, default=5, help="Top-N stories overall")
     p.add_argument(
