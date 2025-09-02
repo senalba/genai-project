@@ -1,6 +1,8 @@
 # src/main.py
+
 import argparse
 import datetime as dt
+import hashlib
 import json
 import os
 import re
@@ -9,8 +11,7 @@ from urllib.parse import urlparse
 
 from dotenv import load_dotenv
 
-load_dotenv()
-
+load_dotenv()  # load OPENAI_API_KEY from .env early
 
 import feedparser
 import numpy as np
@@ -26,6 +27,26 @@ from transformers import (
     logging as hf_logging,
 )
 
+import logging
+
+LOG = logging.getLogger("newsimpact")
+
+
+def setup_logging(level: str = "INFO"):
+    """Initialize console logging once."""
+    # Don’t double-add handlers if Streamlit reloads modules
+    if getattr(setup_logging, "_configured", False):
+        LOG.setLevel(getattr(logging, level.upper(), logging.INFO))
+        return
+    logging.basicConfig(
+        level=getattr(logging, level.upper(), logging.INFO),
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+        datefmt="%H:%M:%S",
+    )
+    setup_logging._configured = True
+    LOG.debug("Logging initialized at %s", level)
+
+
 # ----------------------------- Config -----------------------------
 EN_FEEDS = [
     "http://feeds.bbci.co.uk/news/rss.xml",
@@ -33,28 +54,24 @@ EN_FEEDS = [
     "https://feeds.finance.yahoo.com/rss/2.0/headline?s=^GSPC&region=US&lang=en-US",
     "https://www.investing.com/rss/news.rss",
     "https://www.theguardian.com/world/rss",
-    "http://rss.cnn.com/rss/edition.rss",
+    "https://feeds.reuters.com/reuters/topNews",
     "https://www.theverge.com/rss/index.xml",
-    "https://feeds.feedburner.com/TechCrunch/",
 ]
 
 UA_FEEDS = [
-    # ("Ukrainska Pravda (UA)", "https://www.pravda.com.ua/rss/"),
-    # ("Ukrainska Pravda (EN)", "https://www.pravda.com.ua/eng/rss/"),
-    # ("Ekonomichna Pravda", "https://www.epravda.com.ua/rss/"),
-    # ("European Pravda (EN)", "https://www.eurointegration.com.ua/eng/rss/"),
+    ("Ukrainska Pravda (UA)", "https://www.pravda.com.ua/rss/"),
+    ("Ukrainska Pravda (EN)", "https://www.pravda.com.ua/eng/rss/"),
+    ("Ekonomichna Pravda", "https://www.epravda.com.ua/rss/"),
+    ("European Pravda (EN)", "https://www.eurointegration.com.ua/eng/rss/"),
     ("NV.ua – All news", "https://nv.ua/ukr/rss/all.xml"),
-    # ("Censor.NET (UA)", "https://assets.censor.net/rss/censor.net/rss_uk_news.xml"),
-    # ("Korrespondent.net – All", "https://korrespondent.net/rss"),
-    # ("RBC-Ukraine – All", "https://www.rbc.ua/static/rss/all.news.xml"),
-    # ("BBC News Україна", "https://www.bbc.com/ukrainian/index.xml"),
-    # ("24 Канал (24tv)", "https://24tv.ua/rss/all.xml"),
-    # ("TSN.ua", "https://tsn.ua/rss"),
-    # ("ZN.UA", "https://zn.ua/rss"),
-    # ("Kyiv Independent (EN)", "https://kyivindependent.com/feed"),
-    # ("Kyiv Post (EN)", "https://www.kyivpost.com/feed"),
-    # ("Hromadske", "https://hromadske.ua/feed"),
-    # ("Ukrinform (EN top)", "https://www.ukrinform.net/rss/block-lastnews"),
+    ("RBC-Ukraine – All", "https://www.rbc.ua/static/rss/all.ukr.rss.xml"),
+    ("BBC News Україна", "https://www.bbc.com/ukrainian/index.xml"),
+    ("24 Канал (24tv)", "https://24tv.ua/rss/all.xml"),
+    ("TSN.ua", "https://tsn.ua/rss"),
+    ("ZN.UA", "https://zn.ua/rss"),
+    ("Kyiv Post (EN)", "https://www.kyivpost.com/feed"),
+    ("Ukrinform (EN top)", "https://www.ukrinform.net/rss/block-lastnews"),
+    ("Censor.NET (UA)", "https://assets.censor.net/rss/censor.net/rss_uk_news.xml"),
 ]
 
 FEEDS: List[str] = EN_FEEDS + [u for _, u in UA_FEEDS]
@@ -63,36 +80,74 @@ FEEDS: List[str] = EN_FEEDS + [u for _, u in UA_FEEDS]
 os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
 hf_logging.set_verbosity_error()
 
-UA = {"User-Agent": "Mozilla/5.0 (Macintosh; Apple Silicon) NewsImpact/0.1"}
+UA_HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Apple Silicon) NewsImpact/0.2"}
 
 
 # ----------------------------- Helpers -----------------------------
-def _to_dt(t) -> dt.datetime:
-    try:
-        ts = pd.to_datetime(t, utc=True)
-        if pd.isna(ts):
-            raise ValueError
-        return ts.to_pydatetime()
-    except Exception:
-        return dt.datetime.now(dt.timezone.utc)
-
-
 def _domain(u: str) -> str:
     d = urlparse(u).netloc.lower()
     return d[4:] if d.startswith("www.") else d
 
 
-# ----------------------------- Ingest -----------------------------
+# registrable domain (eTLD+1)
+try:
+    import tldextract
+except Exception:
+    tldextract = None
+
+
+def registrable_domain(host: str) -> str:
+    if not host:
+        return ""
+    if tldextract:
+        ext = tldextract.extract(host)
+        return ".".join([p for p in (ext.domain, ext.suffix) if p]) or host
+    parts = host.split(".")
+    return ".".join(parts[-2:]) if len(parts) >= 2 else host
+
+
+def sha1_text(text: str) -> str:
+    return hashlib.sha1((text or "").encode("utf-8")).hexdigest()
+
+
+def looks_non_english(text: str) -> bool:
+    # quick heuristic: if contains Cyrillic or lots of non-ASCII
+    if re.search(r"[\u0400-\u04FF]", text or ""):
+        return True
+    non_ascii = sum(1 for ch in text or "" if ord(ch) > 127)
+    return non_ascii > max(6, len(text) // 8)
+
+
+# --- ingest ---
 def ingest(
-    feeds: List[str], max_items: int, max_age_hours: int, allow_undated: bool = False
+    feeds: List[str], max_items: int, max_age_hours: int, allow_undated: bool = True
 ) -> pd.DataFrame:
+    LOG.info(
+        "Ingest: feeds=%d, max_items=%d, max_age_hours=%d, allow_undated=%s",
+        len(feeds),
+        max_items,
+        max_age_hours,
+        allow_undated,
+    )
     rows: List[Dict[str, Any]] = []
     for url in feeds:
         try:
-            parsed = feedparser.parse(url)
+            LOG.debug("Fetching feed: %s", url)
+            parsed = feedparser.parse(url, request_headers=UA_HEADERS)
+            if not getattr(parsed, "entries", None):
+                LOG.debug("Feedparser empty, manual GET fallback: %s", url)
+                try:
+                    r = requests.get(url, headers=UA_HEADERS, timeout=10)
+                    r.raise_for_status()
+                    parsed = feedparser.parse(r.content)
+                except Exception as ex2:
+                    LOG.warning("Manual GET failed for %s: %s", url, ex2)
+
             feed_meta = cast(Dict[str, Any], getattr(parsed, "feed", {}) or {})
             entries = cast(List[Dict[str, Any]], getattr(parsed, "entries", []) or [])
-            src = feed_meta.get("title") or url
+            src = feed_meta.get("title") or _domain(url) or url
+            LOG.debug("Parsed feed: source=%s, entries=%d", src, len(entries))
+
             take = max(50, max_items // max(len(feeds), 1) + 1)
             for e in entries[:take]:
                 title = e.get("title")
@@ -100,7 +155,8 @@ def ingest(
                     td = e.get("title_detail")
                     if isinstance(td, dict):
                         title = td.get("value")
-                title = title if isinstance(title, str) else str(title)
+                title = title if isinstance(title, str) else str(title or "")
+
                 link = e.get("link") or ""
                 cand = (
                     e.get("published_parsed")
@@ -116,16 +172,17 @@ def ingest(
                         "title": title,
                         "url": str(link),
                         "source": str(src),
-                        "published_at": cand,  # parse below
+                        "published_at": cand,
                         "summary_hint": str(
                             e.get("summary") or e.get("description") or ""
                         ),
                     }
                 )
         except Exception as ex:
-            print(f"[WARN] Failed feed {url}: {ex}")
+            LOG.warning("Failed feed %s: %s", url, ex)
 
     df = pd.DataFrame(rows).dropna(subset=["title", "url"])
+    LOG.debug("Ingest produced %d rows before filtering", len(df))
     if df.empty:
         return df
 
@@ -142,23 +199,33 @@ def ingest(
     else:
         df2 = dated
 
-    return (
+    out = (
         df2.sort_values("published_at", ascending=False)
         .head(max_items)
         .reset_index(drop=True)
     )
+    LOG.info("Ingest after filters: dated=%d, final=%d", len(dated), len(out))
+    return out
 
 
 # ------------------ Embeddings & Clustering ------------------
 def build_embeddings(df: pd.DataFrame) -> np.ndarray:
+    # With translation, titles should be English; still prefer title_en if present.
     model = SentenceTransformer("all-MiniLM-L6-v2")
-    texts = (df["title"].fillna("") + " — " + df["summary_hint"].fillna("")).tolist()
+    title_col = (
+        "title_en"
+        if "title_en" in df.columns and df["title_en"].notna().any()
+        else "title"
+    )
+    texts = df[title_col].fillna("").astype(str).tolist()
     X = model.encode(texts, normalize_embeddings=True)
     return X
 
 
+# --- greedy_clusters ---
 def greedy_clusters(X: np.ndarray, thr: float = 0.72) -> List[List[int]]:
     n = len(X)
+    LOG.debug("Clustering: greedy, thr=%.2f, items=%d", thr, n)
     used = np.zeros(n, dtype=bool)
     groups: List[List[int]] = []
     for i in range(n):
@@ -168,6 +235,7 @@ def greedy_clusters(X: np.ndarray, thr: float = 0.72) -> List[List[int]]:
         idx = np.where((sims >= thr) & (~used))[0]
         used[idx] = True
         groups.append(idx.tolist())
+    LOG.debug("Clustering produced %d groups", len(groups))
     return groups
 
 
@@ -187,11 +255,13 @@ class FinSent:
         return self.labels[int(np.argmax(logits))]
 
 
-# ----------------------- Article Extraction -----------------------
-def fetch_article_text(url: str, timeout: int = 10, max_chars: int = 6000) -> str:
+# --- fetch_article_text ---
+def fetch_article_text(url: str, timeout: int = 20, max_chars: int = 8000) -> str:
+    LOG.debug("Fetch article: %s", url)
     try:
-        r = requests.get(url, headers=UA, timeout=timeout)
+        r = requests.get(url, headers=UA_HEADERS, timeout=timeout, allow_redirects=True)
         if r.status_code != 200 or not r.text:
+            LOG.debug("HTTP %s or empty body for %s", r.status_code, url)
             return ""
         soup = BeautifulSoup(r.text, "lxml")
 
@@ -200,97 +270,301 @@ def fetch_article_text(url: str, timeout: int = 10, max_chars: int = 6000) -> st
         ):
             tag.decompose()
 
-        def longest_paragraphs(nodes):
+        def extract_from(nodes):
             best = ""
             for node in nodes:
-                txt = " ".join(p.get_text(" ", strip=True) for p in node.find_all("p"))
+                ps = [p.get_text(" ", strip=True) for p in node.find_all("p")]
+                txt = " ".join(ps) if ps else node.get_text(" ", strip=True)
                 if len(txt) > len(best):
                     best = txt
             return best
 
-        article_txt = longest_paragraphs(soup.find_all("article"))
-        if len(article_txt) < 600:
-            article_txt = max(
-                (longest_paragraphs([n]) for n in soup.find_all(["div", "section"])),
-                key=len,
-                default="",
-            )
+        candidates = []
+        candidates += soup.find_all("article")
+        candidates += soup.select('[role="main"]')
+        candidates += soup.select('[itemprop="articleBody"]')
+        candidates += soup.select('div[class*="article"], section[class*="article"]')
+        candidates += soup.select('div[class*="content"], section[class*="content"]')
 
-        article_txt = re.sub(r"\s+", " ", article_txt).strip()
-        return article_txt[:max_chars]
-    except Exception:
+        article_txt = extract_from(candidates) or extract_from(soup.find_all("div"))
+        article_txt = re.sub(r"\s+", " ", (article_txt or "")).strip()
+
+        used_amp = False
+        if len(article_txt) < 500:
+            amp = soup.find("link", rel=lambda v: v and "amphtml" in v.lower())
+            if amp and amp.get("href"):
+                amp_url = amp["href"]
+                if amp_url.startswith("//"):
+                    amp_url = "https:" + amp_url
+                ra = requests.get(amp_url, headers=UA_HEADERS, timeout=timeout)
+                if ra.status_code == 200 and ra.text:
+                    sa = BeautifulSoup(ra.text, "lxml")
+                    for tag in sa(
+                        [
+                            "script",
+                            "style",
+                            "noscript",
+                            "header",
+                            "footer",
+                            "nav",
+                            "aside",
+                            "form",
+                        ]
+                    ):
+                        tag.decompose()
+                    amp_candidates = []
+                    amp_candidates += sa.find_all("article")
+                    amp_candidates += sa.select('[itemprop="articleBody"]')
+                    amp_candidates += sa.find_all("div")
+                    amp_txt = extract_from(amp_candidates)
+                    amp_txt = re.sub(r"\s+", " ", (amp_txt or "")).strip()
+                    if len(amp_txt) > len(article_txt):
+                        article_txt = amp_txt
+                        used_amp = True
+
+        article_txt = (article_txt or "")[:max_chars]
+        LOG.debug(
+            "Article extracted: chars=%d amp=%s url=%s", len(article_txt), used_amp, url
+        )
+        return article_txt
+    except Exception as ex:
+        LOG.debug("Fetch article failed for %s: %s", url, ex)
         return ""
 
 
-# ------------------------ OpenAI Summarizer ------------------------
-class OpenAISummarizer:
-    def __init__(self, model: str = "gpt-4.1-mini", temperature: float = 0.0):
-        from openai import OpenAI  # lazy import
+# ------------------------ OpenAI Clients ------------------------
+class OpenAIBase:
+    def __init__(self):
+        from openai import OpenAI
 
-        self.client = OpenAI()
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise RuntimeError("OPENAI_API_KEY not set")
+        self.client = OpenAI(api_key=api_key)
+
+
+class OpenAITranslator(OpenAIBase):
+    def __init__(self, model: str = "gpt-4.1-mini", temperature: float = 0.0):
+        super().__init__()
         self.model = model
         self.temperature = temperature
+        self.system = (
+            "Translate to clear, neutral, news-style English. "
+            "Preserve named entities, numbers, quotes, and factual content. "
+            "Do not summarize or omit details. Output only the translation."
+        )
 
-    def __call__(self, pieces: List[str]) -> str:
+    def translate(self, texts: List[str]) -> List[str]:
+        out: List[str] = []
+        for t in texts:
+            if not t:
+                out.append("")
+                continue
+            resp = self.client.chat.completions.create(
+                model=self.model,
+                temperature=self.temperature,
+                messages=[
+                    {"role": "system", "content": self.system},
+                    {"role": "user", "content": t[:6000]},
+                ],
+            )
+            out.append((resp.choices[0].message.content or "").strip())
+        return out
+
+
+class OpenAISummarizer(OpenAIBase):
+    def __init__(self, model: str = "gpt-4.1-mini", temperature: float = 0.0):
+        super().__init__()
+        self.model = model
+        self.temperature = temperature
+        self.system = (
+            "You are a meticulous news summarizer. "
+            "Given title and article body, write a neutral 2–3 sentence summary describing the event and key facts. "
+            "Avoid opinionated language."
+        )
+
+    def summarize(self, pieces: List[str]) -> str:
         blob = " ".join(p for p in pieces if p).strip()
         if not blob:
             return ""
-        prompt = (
-            "You are a meticulous news deduper and topic normalizer. "
-            "Given an article title and body, write a 2–3 sentence neutral summary. "
-            "State the event and key facts. Avoid opinions and adjectives."
+        resp = self.client.chat.completions.create(
+            model=self.model,
+            temperature=self.temperature,
+            messages=[
+                {"role": "system", "content": self.system},
+                {"role": "user", "content": blob[:6000]},
+            ],
         )
-        msg = [
-            {"role": "system", "content": prompt},
-            {"role": "user", "content": blob[:6000]},
-        ]
-        out = self.client.chat.completions.create(
-            model=self.model, messages=msg, temperature=self.temperature
-        )
-        return (out.choices[0].message.content or "").strip()
+        return (resp.choices[0].message.content or "").strip()
 
 
-# ----------------------- Story assembly -----------------------
+# --- translate_needed_titles ---
+def translate_needed_titles(
+    out_dir: str, model: str = "gpt-4.1-mini"
+) -> Tuple[int, int]:
+    path = _titles_cache_path(out_dir)
+    if not os.path.exists(path):
+        LOG.info("Titles cache absent, nothing to translate.")
+        return (0, 0)
+    with open(path, "r", encoding="utf-8") as f:
+        obj = json.load(f)
+
+    items: List[Dict[str, Any]] = obj.get("items", [])
+    need_idx: List[int] = []
+    payloads: List[str] = []
+
+    for i, it in enumerate(items):
+        title = it.get("title", "") or ""
+        src_sha = sha1_text(title)
+        ok = (
+            it.get("title_en")
+            and it.get("title_en_sha1") == src_sha
+            and it.get("translator_model") == model
+        )
+        if ok or not looks_non_english(title):
+            if not it.get("title_en"):
+                it["title_en"] = title
+                it["title_en_sha1"] = src_sha
+                it["translator_model"] = model
+                it["translated_at"] = pd.Timestamp.utcnow().isoformat() + "Z"
+            continue
+        need_idx.append(i)
+        payloads.append(title)
+
+    LOG.info("Titles needing translation: %d (model=%s)", len(payloads), model)
+    if not payloads:
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(obj, f, ensure_ascii=False, indent=2)
+        return (0, len(items))
+
+    tx = OpenAITranslator(model=model)
+    outs = tx.translate(payloads)
+
+    for j, i in enumerate(need_idx):
+        en = outs[j]
+        title = items[i].get("title", "")
+        items[i]["title_en"] = en or title
+        items[i]["title_en_sha1"] = sha1_text(title)
+        items[i]["translator_model"] = model
+        items[i]["translated_at"] = pd.Timestamp.utcnow().isoformat() + "Z"
+
+    obj["generated_at"] = pd.Timestamp.utcnow().isoformat() + "Z"
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(obj, f, ensure_ascii=False, indent=2)
+
+    LOG.info("Titles translated (new): %d / total items: %d", len(need_idx), len(items))
+    return (len(need_idx), len(items))
+
+
+# --- translate_needed_bodies ---
+def translate_needed_bodies(
+    out_dir: str, model: str = "gpt-4.1-mini", max_chars: int = 6000
+) -> Tuple[int, int]:
+    path = _articles_cache_path(out_dir)
+    if not os.path.exists(path):
+        LOG.info("Articles cache absent, nothing to translate.")
+        return (0, 0)
+    with open(path, "r", encoding="utf-8") as f:
+        obj = json.load(f)
+
+    by_url: Dict[str, Dict[str, Any]] = obj.get("by_url", {})
+    urls: List[str] = []
+    payloads: List[str] = []
+
+    for u, rec in by_url.items():
+        body = rec.get("body", "") or ""
+        if not body:
+            continue
+        src_sha = sha1_text(body)
+        ok = (
+            rec.get("body_en")
+            and rec.get("body_en_sha1") == src_sha
+            and rec.get("translator_model") == model
+        )
+        if ok or not looks_non_english(body):
+            if not rec.get("body_en"):
+                rec["body_en"] = body
+                rec["body_en_sha1"] = src_sha
+                rec["translator_model"] = model
+                rec["translated_at"] = pd.Timestamp.utcnow().isoformat() + "Z"
+            continue
+        urls.append(u)
+        payloads.append(body[:max_chars])
+
+    LOG.info("Bodies needing translation: %d (model=%s)", len(payloads), model)
+    if not payloads:
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(obj, f, ensure_ascii=False, indent=2)
+        return (0, len(by_url))
+
+    tx = OpenAITranslator(model=model)
+    outs = tx.translate(payloads)
+
+    for j, u in enumerate(urls):
+        en = outs[j]
+        body = by_url[u].get("body", "")
+        by_url[u]["body_en"] = en or body
+        by_url[u]["body_en_sha1"] = sha1_text(body)
+        by_url[u]["translator_model"] = model
+        by_url[u]["translated_at"] = pd.Timestamp.utcnow().isoformat() + "Z"
+
+    obj["generated_at"] = pd.Timestamp.utcnow().isoformat() + "Z"
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(obj, f, ensure_ascii=False, indent=2)
+
+    LOG.info("Bodies translated (new): %d / total urls: %d", len(urls), len(by_url))
+    return (len(urls), len(by_url))
+
+
+# --- build_stories ---
 def build_stories(df: pd.DataFrame, groups: List[List[int]]) -> List[Dict[str, Any]]:
-    """Build clusters where each outlet counts once (dedup by domain)."""
     sent = FinSent()
     stories: List[Dict[str, Any]] = []
     for g in groups:
         sub = df.iloc[g].sort_values("published_at")
-        sub = sub.assign(domain=sub["url"].map(_domain))
+        title_col = "title_en" if "title_en" in sub.columns else "title"
 
-        # keep earliest URL per domain (so each outlet counts once)
-        first_by_domain = sub.sort_values("published_at").drop_duplicates(
-            subset=["domain"], keep="first"
+        sub = sub.assign(host=sub["url"].map(_domain))
+        sub = sub.assign(regdom=sub["host"].map(registrable_domain))
+
+        first_by_regdom = sub.sort_values("published_at").drop_duplicates(
+            subset=["regdom"], keep="first"
         )
 
-        domains = first_by_domain["domain"].tolist()
-        urls_by_domain = {
-            d: u for d, u in zip(first_by_domain["domain"], first_by_domain["url"])
+        regdoms = first_by_regdom["regdom"].tolist()
+        urls_by_regdom = {
+            d: u for d, u in zip(first_by_regdom["regdom"], first_by_regdom["url"])
         }
 
-        sample = " ".join(sub["title"].tolist()[:3])
+        sample = " ".join(sub[title_col].astype(str).tolist()[:3])
         polarity = sent(sample)
 
-        first_seen = pd.to_datetime(first_by_domain["published_at"].min(), utc=True)
-        last_seen = pd.to_datetime(first_by_domain["published_at"].max(), utc=True)
+        first_seen = pd.to_datetime(first_by_regdom["published_at"].min(), utc=True)
+        last_seen = pd.to_datetime(first_by_regdom["published_at"].max(), utc=True)
 
-        canonical_url = first_by_domain.sort_values("published_at").iloc[0]["url"]
-        latest_title = sub.iloc[-1]["title"]
+        canonical_url = first_by_regdom.sort_values("published_at").iloc[0]["url"]
+        latest_title = sub[title_col].iloc[-1]
 
-        stories.append(
-            {
-                "title": latest_title,
-                "summary_llm": None,
-                "sentiment": polarity,
-                "mention_count_domains": len(domains),
-                "domains": sorted(domains),
-                "canonical_url": canonical_url,
-                "sources": [urls_by_domain[d] for d in sorted(domains)],
-                "first_seen": None if pd.isna(first_seen) else first_seen.isoformat(),
-                "last_seen": None if pd.isna(last_seen) else last_seen.isoformat(),
-            }
+        story = {
+            "title": latest_title,
+            "summary_llm": None,
+            "sentiment": polarity,
+            "mention_count_domains": len(regdoms),
+            "domains": sorted(regdoms),
+            "canonical_url": canonical_url,
+            "sources": [urls_by_regdom[d] for d in sorted(regdoms)],
+            "first_seen": None if pd.isna(first_seen) else first_seen.isoformat(),
+            "last_seen": None if pd.isna(last_seen) else last_seen.isoformat(),
+        }
+        LOG.debug(
+            "Story built: outlets=%d, first_seen=%s, last_seen=%s, title=%s",
+            story["mention_count_domains"],
+            story["first_seen"],
+            story["last_seen"],
+            str(latest_title)[:80],
         )
+        stories.append(story)
+    LOG.info("Built %d stories", len(stories))
     return stories
 
 
@@ -307,44 +581,54 @@ def select_top_overall(
     return sorted(stories, key=score)[:k]
 
 
+# --- helper for summarization body selection ---
+def _get_article_text_for_story(s: Dict[str, Any], articles_map: Dict[str, Any]) -> str:
+    def body_of(url: str) -> str:
+        rec = articles_map.get(url, "")
+        if isinstance(rec, dict):
+            return rec.get("body_en") or rec.get("body") or ""
+        return rec or ""
+
+    body = body_of(s.get("canonical_url", ""))
+    if len(body) < 600:
+        for u in s.get("sources", [])[1:3]:
+            alt = body_of(u)
+            if len(alt) > len(body):
+                body = alt
+            if len(body) >= 600:
+                break
+    LOG.debug("Selected article text for summary: chars=%d", len(body))
+    return body
+
+
 def summarize_selected(
     stories: List[Dict[str, Any]],
-    summarizer: str = "openai",
     oa_model: str = "gpt-4.1-mini",
-    articles_map: Dict[str, str] | None = None,
+    articles_map: Dict[str, Any] | None = None,
 ) -> None:
-    if summarizer != "openai":
-        raise ValueError("Only 'openai' summarizer is supported in this build.")
-    oa = OpenAISummarizer(model=oa_model)
+    sm = OpenAISummarizer(model=oa_model)
     for s in stories:
+        title = s.get("title", "")
         body = ""
         if articles_map:
-            body = articles_map.get(s.get("canonical_url", ""), "")
-            if not body:
-                for u in s.get("sources", []):
-                    body = articles_map.get(u, "")
-                    if body:
-                        break
+            body = _get_article_text_for_story(s, articles_map)
         if not body:
             body = fetch_article_text(s.get("canonical_url", ""))
-        parts = [s.get("title", "")]
+        parts = [title]
         if body:
             parts.append(body)
-        s["summary_llm"] = oa(parts)
+        s["summary_llm"] = sm.summarize(parts)
 
 
+# --- assemble_report_payload ---
 def assemble_report_payload(
     stories: List[Dict[str, Any]],
-    summarizer: str,
     oa_model: str,
-    articles_map: Dict[str, str] | None = None,
+    articles_map: Dict[str, Any] | None = None,
+    topN: int = 5,
 ) -> Dict[str, Any]:
-    summarize_selected(
-        stories,
-        summarizer=summarizer,
-        oa_model=oa_model,
-        articles_map=articles_map,
-    )
+    LOG.info("Assembling report payload: topN=%d", topN)
+    summarize_selected(stories, oa_model=oa_model, articles_map=articles_map)
     items = []
     for s in stories:
         items.append(
@@ -359,11 +643,13 @@ def assemble_report_payload(
                 },
             }
         )
-    return {
+    payload = {
         "generated_at": dt.datetime.utcnow().isoformat() + "Z",
-        "topN": len(items),
+        "topN": topN,
         "items": items,
     }
+    LOG.debug("Report payload items=%d", len(items))
+    return payload
 
 
 # --- Cache helpers (titles + articles) ---
@@ -377,8 +663,10 @@ def _articles_cache_path(out_dir: str = "out") -> str:
     return os.path.join(out_dir, "articles_cache.json")
 
 
+# --- update_titles_cache ---
 def update_titles_cache(df: pd.DataFrame, out_dir: str = "out") -> Tuple[int, int]:
     path = _titles_cache_path(out_dir)
+    LOG.debug("Updating titles cache at %s", path)
     if os.path.exists(path):
         with open(path, "r", encoding="utf-8") as f:
             obj = json.load(f)
@@ -398,6 +686,8 @@ def update_titles_cache(df: pd.DataFrame, out_dir: str = "out") -> Tuple[int, in
                     r.published_at, utc=True, errors="coerce"
                 ).isoformat()
             cur["source"] = str(getattr(r, "source", cur.get("source", "")))
+            if "domain" not in cur or not cur["domain"]:
+                cur["domain"] = _domain(url)
         else:
             by_url[url] = {
                 "title": r.title,
@@ -416,19 +706,24 @@ def update_titles_cache(df: pd.DataFrame, out_dir: str = "out") -> Tuple[int, in
         "total_items": len(items),
         "items": items,
     }
+    os.makedirs(out_dir, exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         json.dump(obj, f, ensure_ascii=False, indent=2)
-    print(f"[OK] Titles cache updated: +{added} -> {len(items)} ({path})")
+    LOG.info("Titles cache write: +%d -> %d (%s)", added, len(items), path)
     return added, len(items)
 
 
+# --- update_articles_cache ---
 def update_articles_cache(
     df: pd.DataFrame,
     out_dir: str = "out",
-    timeout: int = 10,
-    max_chars: int = 6000,
+    timeout: int = 20,
+    max_chars: int = 8000,
+    refetch_short: bool = True,
+    min_len: int = 400,
 ) -> Tuple[int, int]:
     path = _articles_cache_path(out_dir)
+    LOG.debug("Updating articles cache at %s", path)
     if os.path.exists(path):
         with open(path, "r", encoding="utf-8") as f:
             obj = json.load(f)
@@ -436,89 +731,58 @@ def update_articles_cache(
     else:
         by_url = {}
 
-    new = 0
+    new_or_refetched = 0
     for url in df["url"].dropna().unique():
-        if url in by_url:
+        rec = by_url.get(url)
+        should_fetch = rec is None
+        if rec and refetch_short:
+            cur_len = int(rec.get("body_len", 0) or 0)
+            if cur_len < min_len:
+                should_fetch = True
+
+        if not should_fetch:
             continue
+
+        LOG.debug(
+            "Fetching article body (%s): %s",
+            "new" if rec is None else "refetch<min_len",
+            url,
+        )
         body = fetch_article_text(url, timeout=timeout, max_chars=max_chars)
         by_url[url] = {
             "body": body,
             "body_len": len(body),
             "fetched_at": pd.Timestamp.utcnow().isoformat() + "Z",
         }
-        new += 1
+        LOG.debug("Saved article body: len=%d url=%s", len(body), url)
+        new_or_refetched += 1
 
     obj = {
         "generated_at": pd.Timestamp.utcnow().isoformat() + "Z",
         "by_url": by_url,
         "total_urls": len(by_url),
     }
+    os.makedirs(out_dir, exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         json.dump(obj, f, ensure_ascii=False, indent=2)
-    print(f"[OK] Articles cache updated: +{new} -> {len(by_url)} ({path})")
-    return new, len(by_url)
+    LOG.info(
+        "Articles cache write: +/↻%d -> %d (%s)", new_or_refetched, len(by_url), path
+    )
+    return new_or_refetched, len(by_url)
 
 
-def load_articles_map(out_dir: str = "out") -> Dict[str, str]:
+def load_articles_map(out_dir: str = "out", extended: bool = True) -> Dict[str, Any]:
+    """Return {url: record}; record may be 'body' string or dict with 'body','body_en'."""
     path = _articles_cache_path(out_dir)
     if not os.path.exists(path):
         return {}
     with open(path, "r", encoding="utf-8") as f:
         obj = json.load(f)
     by_url = obj.get("by_url", {})
+    if extended:
+        return by_url
+    # legacy map
     return {u: rec.get("body", "") for u, rec in by_url.items()}
-
-
-# -------------------------- Orchestration --------------------------
-def run(
-    out_path: str,
-    max_items: int,
-    sim_thr: float,
-    topk: int,
-    feeds: List[str],
-    summarizer: str,
-    oa_model: str,
-    max_age_hours: int,
-    titles_dir: str,
-):
-    print(f"[INFO] Ingesting from {len(feeds)} feeds…")
-    df = ingest(feeds, max_items, max_age_hours)
-    if df.empty:
-        raise RuntimeError("No items ingested from feeds (after recency filter).")
-    print(f"[INFO] Items ingested: {len(df)}")
-
-    # snapshots + update caches
-    dump_titles(df, feeds, out_dir=titles_dir)
-    dump_article_texts(df, out_dir=titles_dir, per_source_limit=None, timeout=10)
-    update_titles_cache(df, out_dir=titles_dir)
-    update_articles_cache(df, out_dir=titles_dir, timeout=10)
-
-    print("[INFO] Embedding…")
-    X = build_embeddings(df)
-
-    print(f"[INFO] Clustering (thr={sim_thr})…")
-    groups = greedy_clusters(X, thr=sim_thr)
-    print(f"[INFO] Story groups: {len(groups)}")
-
-    print("[INFO] Building stories…")
-    stories = build_stories(df, groups)
-
-    print(f"[INFO] Selecting Top-{topk} overall…")
-    top = select_top_overall(stories, k=topk)
-
-    print(f"[INFO] Summarizing Top-{topk} with OpenAI…")
-    articles_map = load_articles_map(out_dir=titles_dir)
-    payload = assemble_report_payload(
-        top,
-        summarizer=summarizer,
-        oa_model=oa_model,
-        articles_map=articles_map,
-    )
-
-    os.makedirs(os.path.dirname(out_path), exist_ok=True)
-    with open(out_path, "w", encoding="utf-8") as f:
-        json.dump(payload, f, ensure_ascii=False, indent=2)
-    print(f"[OK] Wrote {out_path}")
 
 
 # ------------------------------ Snapshots ------------------------------
@@ -600,31 +864,125 @@ def dump_article_texts(
     return path
 
 
+# --- run (CLI orchestration) ---
+def run(
+    out_path: str,
+    max_items: int,
+    sim_thr: float,
+    topk: int,
+    feeds: List[str],
+    oa_model: str,
+    max_age_hours: int,
+    titles_dir: str,
+    translate_bodies: bool,
+):
+    LOG.info(
+        "Run: feeds=%d, topk=%d, sim_thr=%.2f, max_age_hours=%d",
+        len(feeds),
+        topk,
+        sim_thr,
+        max_age_hours,
+    )
+
+    df = ingest(feeds, max_items, max_age_hours, allow_undated=True)
+    if df.empty:
+        LOG.error("No items ingested; abort.")
+        raise RuntimeError("No items ingested from feeds (after recency filter).")
+    LOG.info("Items ingested: %d", len(df))
+
+    dump_titles(df, feeds, out_dir=titles_dir)
+    dump_article_texts(df, out_dir=titles_dir, per_source_limit=None, timeout=10)
+
+    added_titles, total_titles = update_titles_cache(df, out_dir=titles_dir)
+    added_bodies, total_bodies = update_articles_cache(
+        df, out_dir=titles_dir, timeout=10
+    )
+    LOG.info(
+        "Caches updated: titles +%d/%d, articles +/↻%d/%d",
+        added_titles,
+        total_titles,
+        added_bodies,
+        total_bodies,
+    )
+
+    added_en_titles, total_titles = translate_needed_titles(
+        out_dir=titles_dir, model=oa_model
+    )
+    LOG.info("Title translations (new): %d", added_en_titles)
+    if translate_bodies:
+        added_en_bodies, total_bodies = translate_needed_bodies(
+            out_dir=titles_dir, model=oa_model
+        )
+        LOG.info("Body translations (new): %d", added_en_bodies)
+
+    tpath = _titles_cache_path(titles_dir)
+    with open(tpath, "r", encoding="utf-8") as f:
+        tcache = json.load(f)
+    items = tcache.get("items", [])
+    tdf = pd.DataFrame(items)
+    tdf["published_at"] = pd.to_datetime(tdf["published_at"], utc=True, errors="coerce")
+    cutoff = pd.Timestamp.utcnow() - pd.Timedelta(hours=int(max_age_hours))
+    adf = tdf[tdf["published_at"] >= cutoff].copy()
+    if adf.empty:
+        adf = tdf.copy()
+
+    if "summary_hint" not in adf.columns:
+        adf["summary_hint"] = ""
+    if "source" not in adf.columns:
+        adf["source"] = adf.get("domain", "")
+
+    LOG.info("Embedding %d titles…", len(adf))
+    X = build_embeddings(adf)
+
+    LOG.info("Clustering (thr=%.2f)…", sim_thr)
+    groups = greedy_clusters(X, thr=sim_thr)
+    LOG.info("Story groups: %d", len(groups))
+
+    LOG.info("Building stories…")
+    stories = build_stories(adf, groups)
+
+    LOG.info("Selecting Top-%d overall…", topk)
+    top = select_top_overall(stories, k=topk)
+
+    LOG.info("Summarizing Top-%d with %s…", topk, oa_model)
+    articles_map = load_articles_map(out_dir=titles_dir, extended=True)
+    payload = assemble_report_payload(
+        top,
+        oa_model=oa_model,
+        articles_map=articles_map,
+        topN=topk,
+    )
+
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False, indent=2)
+    LOG.info("Report written → %s", out_path)
+
+
 # ------------------------------ CLI ------------------------------
 def parse_args():
     p = argparse.ArgumentParser(
-        description="News Impact: Top-N by distinct outlets (OpenAI summaries)"
+        description="News Impact: cache → translate → cluster → summarize (Top-N by outlets)"
     )
     p.add_argument("--out", default="out/report.json", help="Output JSON path")
     p.add_argument(
         "--titles-dir", default="out", help="Where to write snapshots/caches"
     )
     p.add_argument(
-        "--max-items", type=int, default=1600, help="Max feed items to process"
+        "--max-items", type=int, default=600, help="Max feed items to process"
     )
     p.add_argument("--topk", type=int, default=5, help="Top-N stories overall")
     p.add_argument(
         "--sim-thr",
         type=float,
-        default=0.72,
+        default=0.75,
         help="Cosine similarity threshold for clustering",
     )
     p.add_argument("--feeds", nargs="*", default=None, help="Override feed URLs list")
     p.add_argument(
-        "--summarizer", choices=["openai"], default="openai", help="Summarizer backend"
-    )
-    p.add_argument(
-        "--oa-model", default="gpt-4.1-mini", help="OpenAI model for summarization"
+        "--oa-model",
+        default="gpt-4.1-mini",
+        help="OpenAI model (translator & summarizer)",
     )
     p.add_argument(
         "--max-age-hours",
@@ -632,20 +990,33 @@ def parse_args():
         default=48,
         help="Ignore items older than this many hours",
     )
+    p.add_argument(
+        "--translate-bodies",
+        action="store_true",
+        help="Also translate article bodies (costly)",
+    )
+    p.add_argument(
+        "--log-level",
+        default="INFO",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        help="Console log level",
+    )
+
     return p.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_args()
     feeds = args.feeds if args.feeds else FEEDS
+    setup_logging(args.log_level)
     run(
         out_path=args.out,
         max_items=args.max_items,
         sim_thr=args.sim_thr,
         topk=args.topk,
         feeds=feeds,
-        summarizer=args.summarizer,
         oa_model=args.oa_model,
         max_age_hours=args.max_age_hours,
         titles_dir=args.titles_dir,
+        translate_bodies=args.translate_bodies,
     )

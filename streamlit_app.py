@@ -16,7 +16,7 @@ except Exception:
 # Make project modules importable
 sys.path.append(os.path.dirname(__file__))
 
-from src.main import (  # noqa: E402
+from src.main import (
     FEEDS,
     ingest,
     build_embeddings,
@@ -27,6 +27,8 @@ from src.main import (  # noqa: E402
     update_titles_cache,
     update_articles_cache,
     load_articles_map,
+    translate_needed_titles,
+    translate_needed_bodies,
 )
 
 st.set_page_config(page_title="News Impact", layout="wide")
@@ -88,6 +90,8 @@ oa_model = st.sidebar.selectbox(
     ["gpt-4.1-mini", "gpt-4.1", "gpt-4o-mini", "gpt-4o"],
     index=0,
 )
+translate_titles = st.sidebar.checkbox("Translate titles to English", value=True)
+translate_bodies = st.sidebar.checkbox("Translate article bodies (costly)", value=False)
 
 article_timeout = st.sidebar.number_input("Article timeout (s)", 3, 30, 10, 1)
 
@@ -100,44 +104,51 @@ tab_top, tab_titles = st.tabs(["Top stories", "All titles"])
 # ---------- Update cache ----------
 if update_btn:
     with st.status("Updating cache…", expanded=False) as status:
-        # Ingest with fallback
+        # 1) Ingest
         df = ingest(
             selected_feeds,
             max_items=int(max_items),
             max_age_hours=int(max_age_hours),
-            allow_undated=True,
+            allow_undated=True,  # keep undated UA items
         )
-        if df.empty:
-            df = ingest(
-                selected_feeds,
-                max_items=int(max_items),
-                max_age_hours=max(168, int(max_age_hours)),
-                allow_undated=True,
-            )
         if df.empty:
             status.update(label="No items to cache.", state="error")
             st.stop()
 
-        st.sidebar.caption(f"Fetched rows: {len(df)} (after filters)")
-
+        # 2) Write caches (titles + article bodies)
         added_titles, total_titles = update_titles_cache(df, out_dir="out")
-        st.sidebar.success(f"Titles cache: +{added_titles} (total {total_titles})")
-
         added_bodies, total_bodies = update_articles_cache(
             df, out_dir="out", timeout=int(article_timeout)
         )
-        st.sidebar.success(f"Articles cache: +{added_bodies} (total {total_bodies})")
 
-        status.update(label="Cache updated.", state="complete")
+        # 3) Translate (idempotent; only new/changed items get sent to OpenAI)
+        # Titles first (cheap), then bodies (optional but you said “everything”)
+        tx_titles_new, _ = translate_needed_titles(out_dir="out", model=oa_model)
+        tx_bodies_new, _ = translate_needed_bodies(out_dir="out", model=oa_model)
+
+        # 4) Bust Streamlit file cache so the UI sees the updated JSON files
+        try:
+            load_json.clear()  # clear this cached function
+        except Exception:
+            pass
+        st.cache_data.clear()  # brute-force fallback
+
+        # 5) Sidebar feedback
+        st.sidebar.success(f"Titles cache: +{added_titles} (total {total_titles})")
+        st.sidebar.success(f"Articles cache: +{added_bodies} (total {total_bodies})")
+        st.sidebar.success(f"Translated titles: +{tx_titles_new}")
+        st.sidebar.success(f"Translated bodies: +{tx_bodies_new}")
+
+        status.update(label="Cache updated & translated.", state="complete")
 
 
 # ---------- Summarize from cache ----------
 def render_report(rep: dict):
     items = rep.get("items", [])
-    topN = rep.get("topN", 5)  # default to 5
+    topN = rep.get("topN", 5)
     st.subheader(f"Top {topN} most-mentioned stories (by distinct outlets)")
 
-    # Build a quick lookup from the titles cache: url -> (title, registrable domain)
+    # Build url -> (title_en|title, registrable domain)
     url_to_title = {}
     url_to_regdom = {}
     try:
@@ -146,14 +157,23 @@ def render_report(rep: dict):
             u = it.get("url", "")
             if not u:
                 continue
-            title = it.get("title") or ""
-            dom = it.get("domain") or urlparse(u).netloc.lower()
-            dom = dom[4:] if dom.startswith("www.") else dom
-            reg = registrable_domain(dom)
+            host = urlparse(u).netloc.lower()
+            host = host[4:] if host.startswith("www.") else host
+            # prefer English title if available
+            title = it.get("title_en") or it.get("title") or ""
+            # registrable domain label
+            try:
+                import tldextract
+
+                ext = tldextract.extract(host)
+                reg = ".".join([p for p in (ext.domain, ext.suffix) if p]) or host
+            except Exception:
+                parts = host.split(".")
+                reg = ".".join(parts[-2:]) if len(parts) >= 2 else host
             url_to_title[u] = title
             url_to_regdom[u] = reg
     except Exception:
-        pass  # fail soft; we’ll still render with fallbacks
+        pass
 
     for item in items:
         with st.container(border=True):
@@ -166,16 +186,13 @@ def render_report(rep: dict):
                 f"first seen: {stats.get('first_seen') or '–'}"
             )
 
-            # Render each link as: **[REGDOM]** Title (linked)
             for u in item.get("links", []):
-                # fallbacks if cache didn’t have this URL
                 host = urlparse(u).netloc.lower()
                 host = host[4:] if host.startswith("www.") else host
-                reg = url_to_regdom.get(u) or registrable_domain(host)
+                reg = url_to_regdom.get(u) or host
                 title = url_to_title.get(u) or "(title unavailable)"
-
                 st.markdown(
-                    "- "  # bullet
+                    "- "
                     + f"<strong>[{html.escape(reg.upper())}]</strong> "
                     + f"<a href='{html.escape(u)}' target='_blank'>{html.escape(title)}</a>",
                     unsafe_allow_html=True,
@@ -212,10 +229,10 @@ if summarize_btn:
 
         articles_map = load_articles_map("out")
         payload = assemble_report_payload(
-            top,
-            summarizer="openai",
+            stories=top,
             oa_model=oa_model,
             articles_map=articles_map,
+            topN=int(topk),  # make Top-N explicit
         )
 
         os.makedirs("out", exist_ok=True)
@@ -226,7 +243,7 @@ if summarize_btn:
         status.update(label="Done.", state="complete")
 
         # with tab_top:
-        #     render_report(st.session_state["last_report"])
+        #     (st.session_state["last_report"])
         st.rerun()
 
 # ---------- Auto-load last report on startup ----------

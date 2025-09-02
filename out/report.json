@@ -1,182 +1,152 @@
 {
-  "generated_at": "2025-08-31T02:51:33.701942Z",
-  "top_positive": [
+  "generated_at": "2025-09-02T03:19:46.207789Z",
+  "topN": 10,
+  "items": [
     {
-      "title": "First week 'critical' to avoid children missing school later, parents told",
-      "summary_llm": "Education Secretary Bridget Phillipson said schools and parents should \"double down\" to get children in at the start of the 2025 term . More than half (57%) of pupils who were partially absent in week one became \"persistently absent\" Overall, 18% of pupils were persistently absent in the 2024-25 school year, down from 23% in 2021-22 .",
-      "sentiment": "positive",
-      "mention_count": 1,
-      "mention_count_domains": 1,
-      "domains": [
-        "bbc.com"
+      "summary_title": "Bail has been posted for MP Kuznetsov, who is suspected of corruption in the procurement of drones and electronic warfare equipment.",
+      "summary": "Bail has been posted for MP Oleksiy Kuznetsov, who is suspected of corruption related to the procurement of drones and electronic warfare equipment. The High Anti-Corruption Court set his bail at eight million hryvnias, lower than the prosecution's demand of 30 million. Kuznetsov, a member of the Servant of the People party, was among four individuals detained in an investigation revealing a scheme involving up to 30% kickbacks in state contracts.",
+      "links": [
+        "https://censor.net/ua/news/3571699/nardep-kuznyetsov-vyyishov-na-volyu-pid-zastavu",
+        "https://nv.ua/ukr/ukraine/politics/za-nardepa-kuznyecova-yakogo-pidozryuyut-u-korupciji-vnesli-8-mln-grn-zastavi-50541592.html",
+        "https://www.pravda.com.ua/news/2025/09/1/7528858/",
+        "https://tsn.ua/ukrayina/nardepa-obvynuvachenoho-u-koruptsiyi-vidpustyly-pid-zastavu-2903471.html"
       ],
-      "canonical_url": "https://www.bbc.com/news/articles/cg7jk3rr225o?at_medium=RSS&at_campaign=rss",
-      "sources": [
-        "https://www.bbc.com/news/articles/cg7jk3rr225o?at_medium=RSS&at_campaign=rss"
-      ],
-      "first_seen": "2025-08-31T02:49:58.981903+00:00",
-      "last_seen": "2025-08-31T02:49:58.981903+00:00"
+      "stats": {
+        "distinct_outlets": 4,
+        "first_seen": "2025-09-02T02:47:58.301155+00:00",
+        "last_seen": "2025-09-02T03:11:15.512902+00:00"
+      }
     },
     {
-      "title": "The trade in US body parts that's completely legal - but ripe for exploitation",
-      "summary_llm": "For-profit body trade is effectively outlawed in the UK and other European countries . But looser regulation in the US has allowed the trade to flourish in the U.S. The largest investigation of its kind - conducted by Reuters journalist Brian Grow - has identified 25 for 25 forking companies in the trade .",
-      "sentiment": "positive",
-      "mention_count": 1,
-      "mention_count_domains": 1,
-      "domains": [
-        "bbc.com"
+      "summary_title": "Ukrainian soldiers have liberated Novoekonomichne in the Donetsk region from Russian forces (video).",
+      "summary": "Ukrainian forces have liberated the village of Novoekonomichne in the Donetsk region from Russian control, as reported by the General Staff of the Armed Forces of Ukraine. The operation, carried out by the 425th Separate Assault Regiment \"Skelya,\" took about two weeks and involved raising the Ukrainian flag in the settlement. This action is part of ongoing efforts by Ukrainian troops to regain control over temporarily occupied areas in Donetsk.",
+      "links": [
+        "https://censor.net/ua/news/3571669/syly-oborony-zvilnyly-novoekonomichne-na-donechchyni",
+        "https://www.rbc.ua/rus/news/ukrayinski-voyini-zvilnili-vid-rosiyan-novoekonomichne-1756742883.html",
+        "https://tsn.ua/ukrayina/na-donechchyni-zsu-zvilnyly-vid-okupantiv-selyshche-novoekonomichne-2903378.html",
+        "https://www.ukrinform.net/rubric-ato/4031788-ukrainian-forces-liberate-novoekonomichne-in-donetsk-region.html"
       ],
-      "canonical_url": "https://www.bbc.com/news/articles/ce83r56xwj7o?at_medium=RSS&at_campaign=rss",
-      "sources": [
-        "https://www.bbc.com/news/articles/ce83r56xwj7o?at_medium=RSS&at_campaign=rss"
-      ],
-      "first_seen": "2025-08-31T02:49:58.982046+00:00",
-      "last_seen": "2025-08-31T02:49:58.982046+00:00"
+      "stats": {
+        "distinct_outlets": 4,
+        "first_seen": "2025-09-02T03:11:15.512902+00:00",
+        "last_seen": "2025-09-02T03:11:15.512902+00:00"
+      }
     },
     {
-      "title": "Tories pledge to get all oil and gas out of North Sea",
-      "summary_llm": "Tories pledge to get all oil and gas out of North Sea if elected . Kemi Badenoch to formally announce plan to focus solely on \"maximising extraction\" Reform UK has said it wants more fossil fuels extracted from the North Sea . Labour government has committed to banning new exploration licences .",
-      "sentiment": "positive",
-      "mention_count": 1,
-      "mention_count_domains": 1,
-      "domains": [
-        "bbc.com"
+      "summary_title": "Ukraine has likely struck a Russian target with the \"Flamingo\" missile for the first time. What is known about this?",
+      "summary": "Ukraine likely conducted its first strike using the domestically produced \"Flamingo\" cruise missile on a Russian target in annexed Crimea near Armyansk on August 30. The missile reportedly has a range of up to 3,000 kilometers and can carry a warhead weighing over a ton, potentially allowing Ukraine to target deep into Russian territory. While video footage and satellite images suggest damage to a Russian FSB border post, independent confirmation and detailed damage assessments remain unavailable.",
+      "links": [
+        "https://www.bbc.com/ukrainian/articles/cj0y50lpgy3o?at_medium=RSS&at_campaign=rss",
+        "https://www.kyivpost.com/post/59264",
+        "https://nv.ua/ukr/ukraine/events/flamingo-dalnist-raket-u-3-tis-km-i-udar-po-armyansku-shcho-vidomo-50541595.html",
+        "https://tsn.ua/ukrayina/ukrayina-vpershe-vdaryla-flaminho-po-rosiyskiy-tsili-v-okupovanomu-krymu-voyennyy-ohliadach-povidomyv-detali-2903429.html"
       ],
-      "canonical_url": "https://www.bbc.com/news/articles/cp890n51684o?at_medium=RSS&at_campaign=rss",
-      "sources": [
-        "https://www.bbc.com/news/articles/cp890n51684o?at_medium=RSS&at_campaign=rss"
-      ],
-      "first_seen": "2025-08-31T02:49:58.982143+00:00",
-      "last_seen": "2025-08-31T02:49:58.982143+00:00"
+      "stats": {
+        "distinct_outlets": 4,
+        "first_seen": "2025-09-02T03:11:15.512902+00:00",
+        "last_seen": "2025-09-02T03:11:15.512902+00:00"
+      }
     },
     {
-      "title": "Watch: The best looks from the Venice red carpet so far",
-      "summary_llm": "Thousands of pro-Palestine protesters gathered in the Italian city to demonstrate against the war in Gaza . Helicopter was attempting to collect water to fight wildfires at the time of the crash . At least three people have also died in Spain, Albania and Turkey as wildfires wreak havoc .",
-      "sentiment": "positive",
-      "mention_count": 1,
-      "mention_count_domains": 1,
-      "domains": [
-        "bbc.com"
+      "summary_title": "The United Kingdom extends the protection program for Ukrainians by two years.",
+      "summary": "The UK government announced a two-year extension of the Ukraine Permission Extension (UPE) Scheme, allowing Ukrainians in the UK on existing visa programs to apply for an additional 18 months of stay with full rights. British Home Secretary Yvette Cooper emphasized the UK's ongoing commitment to supporting Ukrainians amid concerns over rising asylum denials by the Home Office. The extension follows previous statements that UK protection for Ukrainians was temporary, and comes amid continued conflict in Ukraine and recent Russian attacks on Kyiv.",
+      "links": [
+        "https://censor.net/ua/news/3571709/programa-zahystu-ukrayintsiv-u-brytaniyi-prodovjena-sche-na-2-roky",
+        "https://www.kyivpost.com/post/59285",
+        "https://nv.ua/ukr/world/countries/britaniya-prodovzhuye-pidtrimku-ukrajinskih-simey-cherez-programu-ukraine-permission-extension-50541608.html",
+        "https://www.rbc.ua/rus/news/britaniya-dva-roki-prodovzhue-programu-zahistu-1756749911.html"
       ],
-      "canonical_url": "https://www.bbc.com/news/videos/c9d0zz3145lo?at_medium=RSS&at_campaign=rss",
-      "sources": [
-        "https://www.bbc.com/news/videos/c9d0zz3145lo?at_medium=RSS&at_campaign=rss"
-      ],
-      "first_seen": "2025-08-31T02:49:58.982404+00:00",
-      "last_seen": "2025-08-31T02:49:58.982404+00:00"
+      "stats": {
+        "distinct_outlets": 4,
+        "first_seen": "2025-09-02T03:11:15.512902+00:00",
+        "last_seen": "2025-09-02T03:11:15.512902+00:00"
+      }
     },
     {
-      "title": "‘Public enemy number one’: The battle against an eight-toothed beetle threatening UK forests",
-      "summary_llm": "The bark beetle has been the scourge of Europe, killing millions of spruce trees . UK government scientists have been fighting back with sniffer dogs, drones and nuclear waste models . They claim the UK has eradicated the beetle from at risk areas in the east and south east . But climate change could make the job even harder in the future .",
-      "sentiment": "positive",
-      "mention_count": 1,
-      "mention_count_domains": 1,
-      "domains": [
-        "bbc.com"
+      "summary_title": "Kostyuk was defeated by Mukhova after a 3-hour match at the US Open: how the battle unfolded",
+      "summary": "At the US Open women's singles round of 16, Ukrainian tennis player Marta Kostyuk was defeated by 13th-ranked Czech player Karolína Muchová after a three-hour match. Kostyuk won the second set in a 7-0 tiebreak but ultimately lost the final set 3-6, ending her run before the quarterfinals. Kostyuk will continue competing in the doubles event alongside Romanian partner Elena-Gabriela Ruse.",
+      "links": [
+        "https://24tv.ua/kostyuk-muhova-rezultat-matchu-18-finalu-us-open-2025_n2905822",
+        "https://champion.com.ua/ukr/tennis/tenis-us-open-kostyuk-postupilasya-muhoviy-u-chetvertomu-koli-zmagan-1048600/",
+        "https://sport.nv.ua/ukr/tennis/marta-kostyuk-prograla-muhoviy-u-1-8-finalu-us-open-2025-pislya-troh-setiv-50541611.html",
+        "https://www.rbc.ua/rus/news/kostyuk-postupilasya-muhoviy-pislya-3-godinnogo-1756758934.html"
       ],
-      "canonical_url": "https://www.bbc.com/news/articles/clyr8yml9rro?at_medium=RSS&at_campaign=rss",
-      "sources": [
-        "https://www.bbc.com/news/articles/clyr8yml9rro?at_medium=RSS&at_campaign=rss"
+      "stats": {
+        "distinct_outlets": 4,
+        "first_seen": "2025-09-02T03:11:15.512902+00:00",
+        "last_seen": "2025-09-02T03:11:15.512902+00:00"
+      }
+    },
+    {
+      "summary_title": "Russia struck the border area of Chernihiv region: a child and an adult woman were injured, homes were destroyed.",
+      "summary": "On the evening of September 1, Russian forces launched drone strikes on the border town of Horodnia in the Chernihiv region, resulting in three explosions. The attack injured a 14-year-old girl and a 50-year-old woman, both hospitalized, and caused damage to private homes. Authorities urged residents to heed air raid warnings and remain in shelters, noting a previous drone attack on Nizhyn had cut off the city's water and electricity.",
+      "links": [
+        "https://censor.net/ua/news/3571705/naslidky-ataky-bezpilotnykiv-na-gorodnyu-na-chernigivschyni-1-veresnya",
+        "https://www.rbc.ua/rus/news/rf-vdarila-prikordonnyu-poraneno-ditinu-y-1756758882.html",
+        "https://tsn.ua/ukrayina/rosiiany-atakuvaly-dronamy-prykordonnia-chernihivshchyny-ye-poraneni-2903573.html",
+        "https://www.ukrinform.net/rubric-ato/4031832-injuries-reported-as-russians-attack-horodnia-in-chernihiv-region-with-drones.html"
       ],
-      "first_seen": "2025-08-31T02:49:58.982479+00:00",
-      "last_seen": "2025-08-31T02:49:58.982479+00:00"
+      "stats": {
+        "distinct_outlets": 4,
+        "first_seen": "2025-09-02T03:11:15.512902+00:00",
+        "last_seen": "2025-09-02T03:11:15.512902+00:00"
+      }
+    },
+    {
+      "summary_title": "Fico plans to meet with Zelensky after talks with Putin.",
+      "summary": "Slovak Prime Minister Robert Fico announced plans to meet Ukrainian President Volodymyr Zelensky on September 5 in eastern Slovakia, following his return from China where he is scheduled to hold talks with Chinese President Xi Jinping and Russian President Vladimir Putin. Fico also criticized EU countries for largely abstaining from attending World War II commemorations in China, emphasizing the importance of engaging in global dialogue amid shifting international power dynamics. Additionally, no concrete agreements have been reported regarding the escalation of Russia-Ukraine negotiations during recent diplomatic meetings.",
+      "links": [
+        "https://censor.net/ua/news/3571675/fitso-anonsuvav-zustrich-iz-zelenskym-5-veresnya",
+        "https://www.kyivpost.com/post/59243",
+        "https://tsn.ua/politika/pislia-rozmov-z-putinym-fitso-zustrinetsia-iz-zelenskym-podrobytsi-2903399.html"
+      ],
+      "stats": {
+        "distinct_outlets": 3,
+        "first_seen": "2025-09-02T03:11:15.512902+00:00",
+        "last_seen": "2025-09-02T03:11:15.512902+00:00"
+      }
+    },
+    {
+      "summary_title": "FT: Plane carrying von der Leyen lands in Bulgaria using paper maps due to Russian interference with GPS",
+      "summary": "A plane carrying European Commission President Ursula von der Leyen experienced GPS navigation failure due to suspected Russian interference while approaching Plovdiv Airport in Bulgaria, forcing the crew to land manually using paper maps after circling the city for nearly an hour. Bulgarian officials reported that the airport's GPS system went dark, attributing the disruption to deliberate jamming amid increased satellite signal interference since Russia's 2022 invasion of Ukraine. Von der Leyen continued her visit to eastern EU states without further incident after the manual landing.",
+      "links": [
+        "https://www.bbc.com/news/articles/c9d07z1439zo?at_medium=RSS&at_campaign=rss",
+        "https://www.eurointegration.com.ua/eng/news/2025/09/1/7219182/",
+        "https://www.kyivpost.com/post/59252"
+      ],
+      "stats": {
+        "distinct_outlets": 3,
+        "first_seen": "2025-09-02T03:11:15.512902+00:00",
+        "last_seen": "2025-09-02T03:11:15.512902+00:00"
+      }
+    },
+    {
+      "summary_title": "Russians attacked Bila Tserkva with drones: there are dead and injured",
+      "summary": "Вночі 2 вересня 2025 року російські ударні дрони атакували місто Біла Церква, спричинивши пожежі та задимлення. Внаслідок атаки загинула одна людина, кілька отримали поранення, а також зафіксовано пошкодження багатоповерхівок, гаражного кооперативу та підприємств. Рятувальні служби продовжують ліквідацію наслідків інциденту.",
+      "links": [
+        "https://24tv.ua/ataka-bpla-bilu-tserkvu-2-veresnya-yaki-naslidki-shho-vidomo_n2905855",
+        "https://www.pravda.com.ua/news/2025/09/2/7528891/",
+        "https://tsn.ua/ukrayina/ponad-10-vybukhiv-u-biliy-tserkvi-voroh-atakuvav-misto-dronamy-2903567.html"
+      ],
+      "stats": {
+        "distinct_outlets": 3,
+        "first_seen": "2025-09-02T03:11:15.512902+00:00",
+        "last_seen": "2025-09-02T03:11:15.512902+00:00"
+      }
+    },
+    {
+      "summary_title": "Britain Supported Trump's Plan for Ukraine: How This Will Affect Peace Negotiations",
+      "summary": "The UK has expressed support for US President Donald Trump's plan to end the war in Ukraine and strengthen security guarantees for European allies, according to UK Defense Minister John Healey. Healey emphasized ongoing negotiations on how Ukraine's allies can secure a future peace agreement, with details of any volunteer coalition deployment to be determined by the terms of the agreement. The UK is awaiting further commitments from partners and is cautious about revealing specifics to avoid strengthening Russia's position in negotiations.",
+      "links": [
+        "https://nv.ua/ukr/world/geopolitics/london-pidtrimav-iniciativu-trampa-shchodo-zavershennya-viyni-ta-garantiy-dlya-ukrajini-50541621.html",
+        "https://www.rbc.ua/rus/news/britaniya-pidtrimala-plan-trampa-shchodo-1756769268.html",
+        "https://tsn.ua/politika/brytaniia-pidtrymala-plan-trampa-shchodo-ukrayiny-shcho-chekaye-na-myrni-perehovory-2903519.html"
+      ],
+      "stats": {
+        "distinct_outlets": 3,
+        "first_seen": "2025-09-02T03:11:15.512902+00:00",
+        "last_seen": "2025-09-02T03:11:15.512902+00:00"
+      }
     }
-  ],
-  "top_negative": [
-    {
-      "title": "Nvidia Is Leading a Mag 7 Selloff, But Breadth Is Mixed",
-      "summary_llm": "The Nasdaq Composite was down 1%, while the S&P 500 was off 0.6% . The Dow was down 160 points, or 0.4% . Tech, industrials, consumer discretionary, and communication services were getting hit hard",
-      "sentiment": "negative",
-      "mention_count": 2,
-      "mention_count_domains": 1,
-      "domains": [
-        "finance.yahoo.com"
-      ],
-      "canonical_url": "https://finance.yahoo.com/m/cff801cd-7806-39ad-9fed-a8ec1b8ef1ff/the-stock-market%E2%80%99s.html?.tsrc=rss",
-      "sources": [
-        "https://finance.yahoo.com/m/cff801cd-7806-39ad-9fed-a8ec1b8ef1ff/the-stock-market%E2%80%99s.html?.tsrc=rss",
-        "https://finance.yahoo.com/m/f04bea1c-8725-3db7-8aee-a508d2dc9875/nvidia-is-leading-a-mag-7.html?.tsrc=rss"
-      ],
-      "first_seen": "2025-08-31T02:49:59.331043+00:00",
-      "last_seen": "2025-08-31T02:49:59.331509+00:00"
-    },
-    {
-      "title": "'Better than I thought' - Moyes lauds maverick Grealish after win at Wolves",
-      "summary_llm": "Jack Grealish has gone from forgotten man to main man in double-quick time since joining Everton on loan . He has been left out of England squad for World Cup qualifiers against Andorra and Serbia . The former Manchester City man is the first Everton player to assist two or more goals in consecutive Premier League appearances for the Toffees . David Moyes: \"He is even better",
-      "sentiment": "negative",
-      "mention_count": 1,
-      "mention_count_domains": 1,
-      "domains": [
-        "bbc.com"
-      ],
-      "canonical_url": "https://www.bbc.com/sport/football/articles/cn85wepeq7po?at_medium=RSS&at_campaign=rss",
-      "sources": [
-        "https://www.bbc.com/sport/football/articles/cn85wepeq7po?at_medium=RSS&at_campaign=rss"
-      ],
-      "first_seen": "2025-08-31T02:49:58.984069+00:00",
-      "last_seen": "2025-08-31T02:49:58.984069+00:00"
-    },
-    {
-      "title": "Elliott sees opportunities to create value at warehouse REIT Rexford Industrial",
-      "summary_llm": "Elliott sees opportunities to create value at warehouse REIT Rexford Industrial . The industrial REIT space has benefited from strong secular tailwinds, as the rise of e-commerce has driven up warehousing needs over time . Despite being a California-based company, they are domiciled in Maryland, which allows the company to classify its board without shareholder approval .",
-      "sentiment": "negative",
-      "mention_count": 1,
-      "mention_count_domains": 1,
-      "domains": [
-        "cnbc.com"
-      ],
-      "canonical_url": "https://www.cnbc.com/2025/08/30/elliott-sees-opportunities-to-create-value-at-warehouse-reit-rexford-industrial-.html",
-      "sources": [
-        "https://www.cnbc.com/2025/08/30/elliott-sees-opportunities-to-create-value-at-warehouse-reit-rexford-industrial-.html"
-      ],
-      "first_seen": "2025-08-31T02:49:59.153983+00:00",
-      "last_seen": "2025-08-31T02:49:59.153983+00:00"
-    },
-    {
-      "title": "The 10 private colleges with the best ROI in the U.S.",
-      "summary_llm": "Princeton University delivers the best ROI among private colleges in the U.S., according to The Princeton Review's latest rankings . The publication considered financial aid, academic rigor and admissions selectivity to determine the colleges that deliver the best value .",
-      "sentiment": "negative",
-      "mention_count": 1,
-      "mention_count_domains": 1,
-      "domains": [
-        "cnbc.com"
-      ],
-      "canonical_url": "https://www.cnbc.com/2025/08/30/us-private-colleges-best-roi.html",
-      "sources": [
-        "https://www.cnbc.com/2025/08/30/us-private-colleges-best-roi.html"
-      ],
-      "first_seen": "2025-08-31T02:49:59.154436+00:00",
-      "last_seen": "2025-08-31T02:49:59.154436+00:00"
-    },
-    {
-      "title": "Core inflation rose to 2.9% in July, highest since February",
-      "summary_llm": "Core inflation rose to 2.9% in July, highest since February . That was up 0.1 percentage point from the June level, but in line with the Dow Jones consensus forecast . The Fed uses the PCE price index as its primary forecasting tool . Central bankers target inflation at 2%, so Friday's report shows the economy still a distance from that level .",
-      "sentiment": "negative",
-      "mention_count": 1,
-      "mention_count_domains": 1,
-      "domains": [
-        "cnbc.com"
-      ],
-      "canonical_url": "https://www.cnbc.com/2025/08/29/pce-inflation-report-july-2025.html",
-      "sources": [
-        "https://www.cnbc.com/2025/08/29/pce-inflation-report-july-2025.html"
-      ],
-      "first_seen": "2025-08-31T02:49:59.154783+00:00",
-      "last_seen": "2025-08-31T02:49:59.154783+00:00"
-    }
-  ],
-  "stats": {
-    "items_ingested": 98,
-    "groups": 95,
-    "feeds": [
-      "http://feeds.bbci.co.uk/news/rss.xml",
-      "https://www.cnbc.com/id/100003114/device/rss/rss.html",
-      "https://feeds.finance.yahoo.com/rss/2.0/headline?s=^GSPC&region=US&lang=en-US",
-      "https://www.investing.com/rss/news.rss"
-    ],
-    "similarity_threshold": 0.72,
-    "summarizer": "hf",
-    "hf_model": "sshleifer/distilbart-cnn-12-6",
-    "max_age_hours": 48
-  }
+  ]
 }
