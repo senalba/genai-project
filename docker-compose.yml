@@ -1,0 +1,10 @@
+services:
+  app:
+    image: news-impact:cpu
+    build: .
+    ports:
+      - "8501:8501"
+    env_file: .env
+    volumes:
+      - ./out:/app/out
+    restart: unless-stopped

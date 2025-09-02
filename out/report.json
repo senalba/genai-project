@@ -1,10 +1,26 @@
 {
-  "generated_at": "2025-09-02T03:19:46.207789Z",
+  "generated_at": "2025-09-02T06:30:55.259261Z",
   "topN": 10,
   "items": [
     {
-      "summary_title": "Bail has been posted for MP Kuznetsov, who is suspected of corruption in the procurement of drones and electronic warfare equipment.",
-      "summary": "Bail has been posted for MP Oleksiy Kuznetsov, who is suspected of corruption related to the procurement of drones and electronic warfare equipment. The High Anti-Corruption Court set his bail at eight million hryvnias, lower than the prosecution's demand of 30 million. Kuznetsov, a member of the Servant of the People party, was among four individuals detained in an investigation revealing a scheme involving up to 30% kickbacks in state contracts.",
+      "summary_title": "What does Bila Tserkva look like after the Russian drone attack: photos from the State Emergency Service",
+      "summary": "In the early hours of September 2, Russian forces launched a drone attack on Bila Tserkva community in Kyiv region. The strike caused a fire, resulted in one death, and left others injured. The body of a man was found during the extinguishing of a fire at a garage cooperative. Damage includes broken windows in multi-story buildings and fires affecting garages, commercial, and industrial premises. Local authorities warned residents about possible smoke in some areas and advised keeping windows closed.",
+      "links": [
+        "https://24tv.ua/ataka-bpla-bilu-tserkvu-2-veresnya-yaki-naslidki-shho-vidomo_n2905855",
+        "https://www.pravda.com.ua/news/2025/09/2/7528891/",
+        "https://www.rbc.ua/rus/news/k-zaraz-viglyadae-bila-tserkva-pislya-dronovoyi-1756787181.html",
+        "https://tsn.ua/ukrayina/ponad-10-vybukhiv-u-biliy-tserkvi-voroh-atakuvav-misto-dronamy-2903567.html",
+        "https://www.ukrinform.net/rubric-ato/4031861-drone-attack-fires-erupt-in-bila-tserkva-one-dead-and-several-injured.html"
+      ],
+      "stats": {
+        "distinct_outlets": 5,
+        "first_seen": "2025-09-02T06:17:30.218181+00:00",
+        "last_seen": "2025-09-02T06:26:21.968721+00:00"
+      }
+    },
+    {
+      "summary_title": "Corruption in drone procurement: an 8 million hryvnia bail was posted for \"Servant of the People\" member Kuznetsov",
+      "summary": "For Ukrainian MP Oleksiy Kuznetsov, implicated in a corruption case involving the procurement of electronic warfare systems and drones, an eight million hryvnia bail was posted on September 1, as confirmed by the spokesperson of the High Anti-Corruption Court, Olesya Chemeris.",
       "links": [
         "https://censor.net/ua/news/3571699/nardep-kuznyetsov-vyyishov-na-volyu-pid-zastavu",
         "https://nv.ua/ukr/ukraine/politics/za-nardepa-kuznyecova-yakogo-pidozryuyut-u-korupciji-vnesli-8-mln-grn-zastavi-50541592.html",
@@ -14,42 +30,12 @@
       "stats": {
         "distinct_outlets": 4,
         "first_seen": "2025-09-02T02:47:58.301155+00:00",
-        "last_seen": "2025-09-02T03:11:15.512902+00:00"
-      }
-    },
-    {
-      "summary_title": "Ukrainian soldiers have liberated Novoekonomichne in the Donetsk region from Russian forces (video).",
-      "summary": "Ukrainian forces have liberated the village of Novoekonomichne in the Donetsk region from Russian control, as reported by the General Staff of the Armed Forces of Ukraine. The operation, carried out by the 425th Separate Assault Regiment \"Skelya,\" took about two weeks and involved raising the Ukrainian flag in the settlement. This action is part of ongoing efforts by Ukrainian troops to regain control over temporarily occupied areas in Donetsk.",
-      "links": [
-        "https://censor.net/ua/news/3571669/syly-oborony-zvilnyly-novoekonomichne-na-donechchyni",
-        "https://www.rbc.ua/rus/news/ukrayinski-voyini-zvilnili-vid-rosiyan-novoekonomichne-1756742883.html",
-        "https://tsn.ua/ukrayina/na-donechchyni-zsu-zvilnyly-vid-okupantiv-selyshche-novoekonomichne-2903378.html",
-        "https://www.ukrinform.net/rubric-ato/4031788-ukrainian-forces-liberate-novoekonomichne-in-donetsk-region.html"
-      ],
-      "stats": {
-        "distinct_outlets": 4,
-        "first_seen": "2025-09-02T03:11:15.512902+00:00",
-        "last_seen": "2025-09-02T03:11:15.512902+00:00"
-      }
-    },
-    {
-      "summary_title": "Ukraine has likely struck a Russian target with the \"Flamingo\" missile for the first time. What is known about this?",
-      "summary": "Ukraine likely conducted its first strike using the domestically produced \"Flamingo\" cruise missile on a Russian target in annexed Crimea near Armyansk on August 30. The missile reportedly has a range of up to 3,000 kilometers and can carry a warhead weighing over a ton, potentially allowing Ukraine to target deep into Russian territory. While video footage and satellite images suggest damage to a Russian FSB border post, independent confirmation and detailed damage assessments remain unavailable.",
-      "links": [
-        "https://www.bbc.com/ukrainian/articles/cj0y50lpgy3o?at_medium=RSS&at_campaign=rss",
-        "https://www.kyivpost.com/post/59264",
-        "https://nv.ua/ukr/ukraine/events/flamingo-dalnist-raket-u-3-tis-km-i-udar-po-armyansku-shcho-vidomo-50541595.html",
-        "https://tsn.ua/ukrayina/ukrayina-vpershe-vdaryla-flaminho-po-rosiyskiy-tsili-v-okupovanomu-krymu-voyennyy-ohliadach-povidomyv-detali-2903429.html"
-      ],
-      "stats": {
-        "distinct_outlets": 4,
-        "first_seen": "2025-09-02T03:11:15.512902+00:00",
-        "last_seen": "2025-09-02T03:11:15.512902+00:00"
+        "last_seen": "2025-09-02T06:26:21.968721+00:00"
       }
     },
     {
       "summary_title": "The United Kingdom extends the protection program for Ukrainians by two years.",
-      "summary": "The UK government announced a two-year extension of the Ukraine Permission Extension (UPE) Scheme, allowing Ukrainians in the UK on existing visa programs to apply for an additional 18 months of stay with full rights. British Home Secretary Yvette Cooper emphasized the UK's ongoing commitment to supporting Ukrainians amid concerns over rising asylum denials by the Home Office. The extension follows previous statements that UK protection for Ukrainians was temporary, and comes amid continued conflict in Ukraine and recent Russian attacks on Kyiv.",
+      "summary": "The United Kingdom has extended the Ukraine Permission Extension (UPE) program by 24 months, allowing Ukrainian citizens and their families with existing visa statuses under various Ukrainian schemes to legally remain in the UK for an additional 18 months. Announced by Home Secretary Yvette Cooper on September 1, the extension aims to continue support for Ukrainians fleeing conflict. The application process is free, grants rights to work, housing, benefits, and education, and is available online starting February 4, 2025. The UK also emphasizes its commitment to aiding refugees from Syria and Hong Kong.",
       "links": [
         "https://censor.net/ua/news/3571709/programa-zahystu-ukrayintsiv-u-brytaniyi-prodovjena-sche-na-2-roky",
         "https://www.kyivpost.com/post/59285",
@@ -59,12 +45,12 @@
       "stats": {
         "distinct_outlets": 4,
         "first_seen": "2025-09-02T03:11:15.512902+00:00",
-        "last_seen": "2025-09-02T03:11:15.512902+00:00"
+        "last_seen": "2025-09-02T06:26:21.968721+00:00"
       }
     },
     {
       "summary_title": "Kostyuk was defeated by Mukhova after a 3-hour match at the US Open: how the battle unfolded",
-      "summary": "At the US Open women's singles round of 16, Ukrainian tennis player Marta Kostyuk was defeated by 13th-ranked Czech player Karolína Muchová after a three-hour match. Kostyuk won the second set in a 7-0 tiebreak but ultimately lost the final set 3-6, ending her run before the quarterfinals. Kostyuk will continue competing in the doubles event alongside Romanian partner Elena-Gabriela Ruse.",
+      "summary": "Ukrainian tennis player Marta Kostyuk was defeated by Czech top seed Karolína Muchová in the US Open round of 16 after a three-hour match. Muchová won the first set 6-3, Kostyuk claimed the second set in a tiebreak, and Muchová secured the final set 6-3. With this result, no Ukrainian players remain in the singles draw at the tournament. The final score was Kostyuk 3-6, 7-6, 3-6 Muchová.",
       "links": [
         "https://24tv.ua/kostyuk-muhova-rezultat-matchu-18-finalu-us-open-2025_n2905822",
         "https://champion.com.ua/ukr/tennis/tenis-us-open-kostyuk-postupilasya-muhoviy-u-chetvertomu-koli-zmagan-1048600/",
@@ -74,78 +60,97 @@
       "stats": {
         "distinct_outlets": 4,
         "first_seen": "2025-09-02T03:11:15.512902+00:00",
-        "last_seen": "2025-09-02T03:11:15.512902+00:00"
+        "last_seen": "2025-09-02T06:26:21.968721+00:00"
       }
     },
     {
-      "summary_title": "Russia struck the border area of Chernihiv region: a child and an adult woman were injured, homes were destroyed.",
-      "summary": "On the evening of September 1, Russian forces launched drone strikes on the border town of Horodnia in the Chernihiv region, resulting in three explosions. The attack injured a 14-year-old girl and a 50-year-old woman, both hospitalized, and caused damage to private homes. Authorities urged residents to heed air raid warnings and remain in shelters, noting a previous drone attack on Nizhyn had cut off the city's water and electricity.",
+      "summary_title": "New Ukrainian Flamingo Cruise Missile Scores Hits on Russian Secret Service Base in Crimea",
+      "summary": "Ukraine reportedly used its domestically produced Flamingo cruise missile for the first time in an attack on a Russian FSB border post near Armyansk in annexed Crimea. The missile, unveiled in August with a range of up to 3,000 km and a warhead exceeding one ton, was launched on August 31 as shown in videos from Ukrainian sources. While some reports attribute the strike to Neptune missiles, Ukrainian military outlets claim Flamingo missiles were used. Satellite images show possible damage at the target site, but independent confirmation and detailed damage assessments are lacking. The Flamingo missile's long range could enable Ukraine to strike deep into Russian territory, posing a significant challenge to Russian military-industrial facilities. The missile is believed to be a Ukrainian variant of the Emirati FP-5 missile, capable of cruising at speeds up to 900 km/h and flying for up to four hours. Production capacity and quantity of these missiles remain unknown.",
       "links": [
-        "https://censor.net/ua/news/3571705/naslidky-ataky-bezpilotnykiv-na-gorodnyu-na-chernigivschyni-1-veresnya",
-        "https://www.rbc.ua/rus/news/rf-vdarila-prikordonnyu-poraneno-ditinu-y-1756758882.html",
-        "https://tsn.ua/ukrayina/rosiiany-atakuvaly-dronamy-prykordonnia-chernihivshchyny-ye-poraneni-2903573.html",
-        "https://www.ukrinform.net/rubric-ato/4031832-injuries-reported-as-russians-attack-horodnia-in-chernihiv-region-with-drones.html"
+        "https://www.bbc.com/ukrainian/articles/cj0y50lpgy3o?at_medium=RSS&at_campaign=rss",
+        "https://www.kyivpost.com/post/59264",
+        "https://nv.ua/ukr/ukraine/events/flamingo-dalnist-raket-u-3-tis-km-i-udar-po-armyansku-shcho-vidomo-50541595.html",
+        "https://tsn.ua/ukrayina/ukrayina-vpershe-vdaryla-flaminho-po-rosiyskiy-tsili-v-okupovanomu-krymu-voyennyy-ohliadach-povidomyv-detali-2903429.html"
       ],
       "stats": {
         "distinct_outlets": 4,
-        "first_seen": "2025-09-02T03:11:15.512902+00:00",
-        "last_seen": "2025-09-02T03:11:15.512902+00:00"
+        "first_seen": "2025-09-02T06:17:30.218181+00:00",
+        "last_seen": "2025-09-02T06:26:21.968721+00:00"
       }
     },
     {
-      "summary_title": "Fico plans to meet with Zelensky after talks with Putin.",
-      "summary": "Slovak Prime Minister Robert Fico announced plans to meet Ukrainian President Volodymyr Zelensky on September 5 in eastern Slovakia, following his return from China where he is scheduled to hold talks with Chinese President Xi Jinping and Russian President Vladimir Putin. Fico also criticized EU countries for largely abstaining from attending World War II commemorations in China, emphasizing the importance of engaging in global dialogue amid shifting international power dynamics. Additionally, no concrete agreements have been reported regarding the escalation of Russia-Ukraine negotiations during recent diplomatic meetings.",
+      "summary_title": "Russia attacked Ukraine at night with 150 Shaheds and drone imitators: Air Defense neutralized 120 drones — Air Forces",
+      "summary": "On the night of September 1, Russia launched an attack on Ukraine using 150 Shahed attack drones and various drone imitators. Ukraine's Air Defense forces successfully neutralized 120 of these drones, while 30 drones struck targets across nine locations. The drones were launched from Russian cities including Kursk, Bryansk, Millerovo, Primorsko-Akhtarsk, and from Cape Chauda in temporarily occupied Crimea. The Ukrainian response involved aviation, anti-aircraft missile troops, electronic warfare units, drone systems, and mobile fire groups of the Defense Forces.",
+      "links": [
+        "https://nv.ua/ukr/ukraine/events/ataka-shahediv-po-ukrajini-vluchannya-zafiksovano-u-9-lokaciyah-krajini-50541638.html",
+        "https://www.pravda.com.ua/news/2025/09/2/7528900/",
+        "https://www.rbc.ua/rus/news/ukrayinu-atakuyut-dekilka-grup-shahediv-de-1756757240.html",
+        "https://tsn.ua/ukrayina/nyzka-droniv-atakuye-ukrayinu-nazvana-trayektoriia-polyotu-2903549.html"
+      ],
+      "stats": {
+        "distinct_outlets": 4,
+        "first_seen": "2025-09-02T06:17:30.218181+00:00",
+        "last_seen": "2025-09-02T06:26:21.968721+00:00"
+      }
+    },
+    {
+      "summary_title": "A landslide in Sudan destroyed an entire village, killing at least 1,000 people.",
+      "summary": "A landslide on August 31 in the Marra Mountains area of western Sudan destroyed an entire village, killing at least 1,000 people, with only one survivor reported. The tragedy followed several days of heavy rain. The affected village was completely leveled. The Sudan People's Liberation Army, which controls the Darfur region where the disaster occurred, has appealed to the United Nations and international humanitarian organizations for assistance in recovering the victims' bodies. The region is affected by ongoing conflict between the Sudanese army and paramilitary Rapid Support Forces, causing widespread displacement, food shortages, and insecurity. Over half the population faces hunger due to a two-year civil war, and the capital of North Darfur, El Fasher, remains under constant shelling.",
+      "links": [
+        "https://www.bbc.com/news/articles/cdj2jygzzk9o?at_medium=RSS&at_campaign=rss",
+        "https://nv.ua/ukr/world/countries/zsuv-gruntu-u-sudani-znishchiv-selo-vizhila-lishe-odna-lyudina-1000-zagiblih-50541636.html",
+        "https://www.pravda.com.ua/news/2025/09/2/7528894/",
+        "https://www.theguardian.com/world/2025/sep/02/sudan-landslide-kills-at-least-1000-people-rebel-group-says"
+      ],
+      "stats": {
+        "distinct_outlets": 4,
+        "first_seen": "2025-09-02T06:17:30.218181+00:00",
+        "last_seen": "2025-09-02T06:26:21.968721+00:00"
+      }
+    },
+    {
+      "summary_title": "Ukrainian soldiers have liberated Novoekonomichne in the Donetsk region from Russian forces (video).",
+      "summary": "Ukrainian forces have liberated the village of Novoekonomichne in the Donetsk region from Russian occupation. On August 31, soldiers from the 425th Separate Assault Regiment \"Skelya\" entered the settlement and raised the Ukrainian flag. The operation took about two weeks and was part of ongoing efforts to regain control over temporarily occupied areas in Donetsk. Previously, Russian forces had occupied Komyshuvakha and advanced near Maliivka and Novoukrainka.",
+      "links": [
+        "https://censor.net/ua/news/3571669/syly-oborony-zvilnyly-novoekonomichne-na-donechchyni",
+        "https://www.rbc.ua/rus/news/ukrayinski-voyini-zvilnili-vid-rosiyan-novoekonomichne-1756742883.html",
+        "https://tsn.ua/ukrayina/na-donechchyni-zsu-zvilnyly-vid-okupantiv-selyshche-novoekonomichne-2903378.html",
+        "https://www.ukrinform.net/rubric-ato/4031788-ukrainian-forces-liberate-novoekonomichne-in-donetsk-region.html"
+      ],
+      "stats": {
+        "distinct_outlets": 4,
+        "first_seen": "2025-09-02T06:26:21.968721+00:00",
+        "last_seen": "2025-09-02T06:26:21.968721+00:00"
+      }
+    },
+    {
+      "summary_title": "Slovak PM says he will meet Zelenskyy after talks with Putin in China",
+      "summary": "Slovak Prime Minister Robert Fico announced he will meet Ukrainian President Volodymyr Zelenskyy on September 5 in eastern Slovakia, following his return from China where he is scheduled to hold talks with Chinese President Xi Jinping and Russian President Vladimir Putin. Fico criticized EU countries for largely boycotting the WWII anniversary celebrations in China, emphasizing the importance of engaging in dialogue amid shifting global power dynamics. His foreign minister also discussed the trip with EU diplomatic chief. Meanwhile, no concrete agreements have been reached yet on advancing Russia-Ukraine negotiations, and Ukrainian sources say a direct meeting between Zelenskyy and Putin is unlikely without increased US pressure on Russia.",
       "links": [
         "https://censor.net/ua/news/3571675/fitso-anonsuvav-zustrich-iz-zelenskym-5-veresnya",
         "https://www.kyivpost.com/post/59243",
+        "https://www.pravda.com.ua/eng/news/2025/09/1/7528836/",
         "https://tsn.ua/politika/pislia-rozmov-z-putinym-fitso-zustrinetsia-iz-zelenskym-podrobytsi-2903399.html"
       ],
       "stats": {
-        "distinct_outlets": 3,
-        "first_seen": "2025-09-02T03:11:15.512902+00:00",
-        "last_seen": "2025-09-02T03:11:15.512902+00:00"
+        "distinct_outlets": 4,
+        "first_seen": "2025-09-02T06:26:21.968721+00:00",
+        "last_seen": "2025-09-02T06:26:21.968721+00:00"
       }
     },
     {
-      "summary_title": "FT: Plane carrying von der Leyen lands in Bulgaria using paper maps due to Russian interference with GPS",
-      "summary": "A plane carrying European Commission President Ursula von der Leyen experienced GPS navigation failure due to suspected Russian interference while approaching Plovdiv Airport in Bulgaria, forcing the crew to land manually using paper maps after circling the city for nearly an hour. Bulgarian officials reported that the airport's GPS system went dark, attributing the disruption to deliberate jamming amid increased satellite signal interference since Russia's 2022 invasion of Ukraine. Von der Leyen continued her visit to eastern EU states without further incident after the manual landing.",
+      "summary_title": "Russia attacks Ukraine with 150 drones, hit recorded in 9 locations",
+      "summary": "Between July and August 2025, Ukrainian forces conducted multiple strikes on Russian facilities involved in producing, storing, and transporting Shahed kamikaze drones, significantly reducing Russian drone attacks. Key attacks included destruction of workshops at the Izhevsk Electromechanical Plant, strikes on a warhead factory in Moscow Region, a chemical plant in Krasnozavodsk, a storage hub in Tatarstan, and sinking an Iranian ship carrying drone parts at the Olya seaport. These operations led to a one-third drop in Shahed drone launches against Ukraine, from 6,303 in July to 4,132 in August. Analysts attribute the decline to disrupted Russian drone stockpiles and production. In response, Russia is building new drone launch sites and expanding production efforts.",
       "links": [
-        "https://www.bbc.com/news/articles/c9d07z1439zo?at_medium=RSS&at_campaign=rss",
-        "https://www.eurointegration.com.ua/eng/news/2025/09/1/7219182/",
-        "https://www.kyivpost.com/post/59252"
+        "https://censor.net/ua/news/3571701/ataka-rosiyiskyh-udarnyh-bezpilotnykiv-1-veresnya",
+        "https://www.kyivpost.com/post/59272",
+        "https://www.pravda.com.ua/eng/news/2025/09/2/7528900/",
+        "https://tsn.ua/ukrayina/rf-vdaryla-po-ukrayini-shakhedamy-skilky-droniv-i-de-zbyla-ppo-2903624.html"
       ],
       "stats": {
-        "distinct_outlets": 3,
-        "first_seen": "2025-09-02T03:11:15.512902+00:00",
-        "last_seen": "2025-09-02T03:11:15.512902+00:00"
-      }
-    },
-    {
-      "summary_title": "Russians attacked Bila Tserkva with drones: there are dead and injured",
-      "summary": "Вночі 2 вересня 2025 року російські ударні дрони атакували місто Біла Церква, спричинивши пожежі та задимлення. Внаслідок атаки загинула одна людина, кілька отримали поранення, а також зафіксовано пошкодження багатоповерхівок, гаражного кооперативу та підприємств. Рятувальні служби продовжують ліквідацію наслідків інциденту.",
-      "links": [
-        "https://24tv.ua/ataka-bpla-bilu-tserkvu-2-veresnya-yaki-naslidki-shho-vidomo_n2905855",
-        "https://www.pravda.com.ua/news/2025/09/2/7528891/",
-        "https://tsn.ua/ukrayina/ponad-10-vybukhiv-u-biliy-tserkvi-voroh-atakuvav-misto-dronamy-2903567.html"
-      ],
-      "stats": {
-        "distinct_outlets": 3,
-        "first_seen": "2025-09-02T03:11:15.512902+00:00",
-        "last_seen": "2025-09-02T03:11:15.512902+00:00"
-      }
-    },
-    {
-      "summary_title": "Britain Supported Trump's Plan for Ukraine: How This Will Affect Peace Negotiations",
-      "summary": "The UK has expressed support for US President Donald Trump's plan to end the war in Ukraine and strengthen security guarantees for European allies, according to UK Defense Minister John Healey. Healey emphasized ongoing negotiations on how Ukraine's allies can secure a future peace agreement, with details of any volunteer coalition deployment to be determined by the terms of the agreement. The UK is awaiting further commitments from partners and is cautious about revealing specifics to avoid strengthening Russia's position in negotiations.",
-      "links": [
-        "https://nv.ua/ukr/world/geopolitics/london-pidtrimav-iniciativu-trampa-shchodo-zavershennya-viyni-ta-garantiy-dlya-ukrajini-50541621.html",
-        "https://www.rbc.ua/rus/news/britaniya-pidtrimala-plan-trampa-shchodo-1756769268.html",
-        "https://tsn.ua/politika/brytaniia-pidtrymala-plan-trampa-shchodo-ukrayiny-shcho-chekaye-na-myrni-perehovory-2903519.html"
-      ],
-      "stats": {
-        "distinct_outlets": 3,
-        "first_seen": "2025-09-02T03:11:15.512902+00:00",
-        "last_seen": "2025-09-02T03:11:15.512902+00:00"
+        "distinct_outlets": 4,
+        "first_seen": "2025-09-02T06:26:21.968721+00:00",
+        "last_seen": "2025-09-02T06:26:21.968721+00:00"
       }
     }
   ]
